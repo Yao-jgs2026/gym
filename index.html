@@ -1,0 +1,3410 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>大姚健身会员管理系统 - 工作台</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+:root {
+  --c-primary: #BEF264;          /* 荧光柠檬绿（深底强调/按钮） */
+  --c-primary-dark: #84CC16;     /* 渐变深端 */
+  --c-primary-light: #ECFCCB;    /* 浅绿底 */
+  --c-primary-ink: #3F6212;      /* 白底上的绿色文字 */
+  --c-bg: #F4F6F8;
+  --c-card-bg: #fff;
+  --c-text: #2B2B2B;
+  --c-text-light: #6B7280;
+  --c-border: #e3e5e8;
+  --c-success: #00A86B;
+  --c-warning: #F5A623;
+  --c-danger: #FF4B4B;
+  --c-sidebar-w: 210px;
+  --c-sidebar-bg: #111827;       /* 近黑深蓝 */
+  --c-sidebar-bg-light: #1F2937;
+  --c-head-bg: #1F2937;          /* 深色表头 */
+  --c-shadow: 0 2px 10px rgba(0,0,0,0.07);
+  --c-shadow-hover: 0 4px 16px rgba(0,0,0,0.12);
+  --c-chest: #F4B084;
+  --c-back: #9DC3E6;
+  --c-glute: #A9D08E;
+  --c-core: #FFD966;
+  --c-cardio: #CCC0DA;
+}
+body { font-family: "Microsoft YaHei", "Segoe UI", sans-serif; background: var(--c-bg); color: var(--c-text); }
+/* Sidebar */
+#sidebar {
+  position: fixed; left: 0; top: 0; width: var(--c-sidebar-w); height: 100vh;
+  background: var(--c-sidebar-bg); color: #E5E7EB; z-index: 100; overflow-y: auto;
+  display: flex; flex-direction: column; border-right: none;
+}
+#sidebar .logo {
+  padding: 22px 16px 18px; text-align: center;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+  background: linear-gradient(180deg, rgba(190,242,100,0.10), rgba(190,242,100,0));
+}
+#sidebar .logo h1 { font-size: 17px; font-weight: 700; margin-bottom: 5px; letter-spacing: 0.5px; }
+#sidebar .logo p { font-size: 11px; opacity: 0.5; }
+#sidebar .nav { flex: 1; padding: 10px 0; }
+#sidebar .nav-item {
+  display: flex; align-items: center; gap: 10px; padding: 13px 20px;
+  cursor: pointer; transition: all 0.2s; font-size: 14px; color: #9CA3AF;
+  border-left: 3px solid transparent;
+}
+#sidebar .nav-item:hover { background: var(--c-sidebar-bg-light); color: #fff; }
+#sidebar .nav-item.active {
+  background: linear-gradient(90deg, rgba(190,242,100,0.20), rgba(190,242,100,0.02));
+  color: var(--c-primary); border-left-color: var(--c-primary); font-weight: 600;
+}
+#sidebar .nav-item .icon { font-size: 17px; width: 24px; text-align: center; }
+#sidebar .footer { padding: 12px 20px; font-size: 11px; opacity: 0.4; border-top: 1px solid rgba(255,255,255,0.08); }
+/* Main */
+#main { margin-left: var(--c-sidebar-w); padding: 16px 24px; min-height: 100vh; }
+.page { display: none; }
+.page.active { display: block; }
+.page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+.page-header h2 { font-size: 20px; color: #334155; display: flex; align-items: center; gap: 9px; }
+.page-header h2::before { content: ''; display: inline-block; width: 4px; height: 19px; background: var(--c-primary-dark); border-radius: 2px; flex-shrink: 0; }
+.page-header .actions { display: flex; gap: 8px; }
+/* Buttons */
+.btn {
+  display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px;
+  border: none; border-radius: 4px; font-size: 14px; cursor: pointer;
+  transition: all 0.2s; font-family: inherit; white-space: nowrap;
+}
+.btn-primary { background: var(--c-primary); color: #111827; font-weight: 600; }
+.btn-primary:hover { background: var(--c-primary-dark); color: #fff; }
+.btn-success { background: var(--c-success); color: #fff; }
+.btn-success:hover { opacity: 0.9; }
+.btn-warning { background: var(--c-warning); color: #333; }
+.btn-danger { background: var(--c-danger); color: #fff; }
+.btn-danger:hover { opacity: 0.9; }
+.btn-default { background: #fff; color: #333; border: 1px solid var(--c-border); }
+.btn-default:hover { background: #f5f5f5; }
+.btn-sm { padding: 4px 10px; font-size: 12px; }
+.btn-lg { padding: 10px 24px; font-size: 16px; }
+/* Tables */
+.table-wrap { background: var(--c-card-bg); border-radius: 8px; overflow: hidden; box-shadow: var(--c-shadow); }
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+thead th {
+  background: var(--c-head-bg); color: #F3F4F6; padding: 11px 8px; text-align: center;
+  font-weight: 600; white-space: nowrap; position: sticky; top: 0;
+  letter-spacing: 0.3px;
+}
+tbody td { padding: 10px 8px; border-bottom: 1px solid #f0f1f3; text-align: center; }
+tbody tr:hover { background: #F7FEE7; }
+tbody tr:nth-child(even) { background: #fbfbfc; }
+tbody tr:nth-child(even):hover { background: #F7FEE7; }
+/* Training color cells */
+.tc-chest { background: var(--c-chest) !important; }
+.tc-back { background: var(--c-back) !important; }
+.tc-glute { background: var(--c-glute) !important; }
+.tc-core { background: var(--c-core) !important; }
+.tc-cardio { background: var(--c-cardio) !important; }
+
+/* Fixed color bar (replaces repeated legends) */
+.color-bar {
+  display: flex; align-items: center; gap: 16px; padding: 8px 16px;
+  background: var(--c-card-bg); border-radius: 8px; margin-bottom: 12px;
+  box-shadow: var(--c-shadow); font-size: 13px;
+}
+.color-bar .label { font-weight: 600; color: var(--c-text-light); white-space: nowrap; }
+.color-bar .item { display: flex; align-items: center; gap: 4px; }
+.color-bar .swatch { width: 14px; height: 14px; border-radius: 3px; display: inline-block; }
+/* 云同步状态指示 */
+.cloud-status {
+  margin-left: auto; display: flex; align-items: center; gap: 6px;
+  font-size: 12px; color: var(--c-text-light); white-space: nowrap; flex-shrink: 0;
+}
+.cloud-status .dot { width: 7px; height: 7px; border-radius: 50%; background: #CBD5E1; display: inline-block; }
+.cloud-status.on .dot { background: #22C55E; }
+.cloud-status.loading .dot { background: #F59E0B; }
+.cloud-status.err { color: var(--c-danger); }
+.cloud-status.err .dot { background: var(--c-danger); }
+
+/* 保存状态指示 */
+.save-status {
+  margin-left: 14px; display: flex; align-items: center; gap: 6px;
+  font-size: 12px; color: var(--c-text-light); white-space: nowrap; flex-shrink: 0;
+}
+.save-status .dot { width: 7px; height: 7px; border-radius: 50%; background: #22C55E; display: inline-block; }
+.save-status.warn .dot { background: #F59E0B; }
+.save-status.err { color: var(--c-danger); }
+.save-status.err .dot { background: var(--c-danger); }
+
+/* 首页问候横幅（日期 + 实时时间 + 每日一句） */
+.dash-hero {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  text-align: center; gap: 6px;
+  padding: 26px 22px; margin-bottom: 14px; border-radius: 14px; color: #fff;
+  background: linear-gradient(135deg, #111827 0%, #1F2937 100%);
+  box-shadow: 0 6px 20px rgba(0,0,0,0.18);
+}
+.hero-left { display: flex; align-items: baseline; justify-content: center; gap: 16px; flex-wrap: wrap; }
+.hero-date { font-size: 15px; opacity: 0.92; }
+.hero-time { font-size: 42px; font-weight: 700; letter-spacing: 2px; font-variant-numeric: tabular-nums; line-height: 1.1; }
+.hero-time .sec { font-size: 18px; opacity: 0.8; margin-left: 1px; font-weight: 500; }
+.hero-right { text-align: center; min-width: 0; width: 100%; }
+.hero-greet { font-size: 18px; font-weight: 600; margin-top: 4px; }
+.hero-quote {
+  font-size: 22px; font-weight: 700; letter-spacing: 0.5px; line-height: 1.5;
+  margin: 10px auto 0; max-width: 760px; cursor: pointer;
+  color: var(--c-primary); text-shadow: 0 1px 8px rgba(0,0,0,0.4);
+}
+.hero-sub { font-size: 12.5px; opacity: 0.9; margin-top: 10px; }
+
+/* Training plan visualization */
+.training-plan { display: flex; align-items: center; flex-wrap: wrap; gap: 6px; padding: 8px 0; }
+.plan-node {
+  padding: 6px 14px; border-radius: 20px; font-size: 13px; font-weight: 600;
+  border: 2px solid; white-space: nowrap;
+}
+.plan-node.current { box-shadow: 0 0 0 3px rgba(68,114,196,0.2); transform: scale(1.05); }
+.plan-node.next { border-style: dashed; }
+.plan-arrow { color: var(--c-text-light); font-size: 16px; }
+.plan-loop { color: var(--c-text-light); font-size: 12px; margin-left: 8px; }
+
+/* Member detail modal */
+.member-detail { max-width: 700px; }
+.member-detail .detail-header {
+  display: flex; justify-content: space-between; align-items: center;
+  padding-bottom: 12px; border-bottom: 2px solid var(--c-primary-light); margin-bottom: 16px;
+}
+.member-detail .detail-header h3 { font-size: 18px; }
+.member-detail .detail-header .id-badge { font-size: 14px; color: #666; }
+.detail-section { margin-bottom: 16px; }
+.detail-section h4 { font-size: 14px; color: var(--c-primary-ink); margin-bottom: 8px; }
+.detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.detail-grid .item { font-size: 13px; }
+.detail-grid .item .key { color: var(--c-text-light); }
+.detail-grid .item .val { font-weight: 600; }
+
+/* Timeline */
+.timeline { position: relative; padding-left: 20px; }
+.timeline::before { content: ''; position: absolute; left: 6px; top: 0; bottom: 0; width: 2px; background: var(--c-border); }
+.timeline-item { position: relative; padding: 6px 0 6px 16px; font-size: 13px; }
+.timeline-item::before { content: ''; position: absolute; left: -14px; top: 12px; width: 10px; height: 10px; border-radius: 50%; background: var(--c-primary-ink); border: 2px solid #fff; }
+.timeline-item .date { color: var(--c-text-light); font-size: 12px; }
+.timeline-item .training { font-weight: 600; }
+
+/* Distribution bars */
+.dist-list { display: flex; flex-direction: column; gap: 6px; }
+.dist-item { display: flex; align-items: center; gap: 8px; font-size: 13px; }
+.dist-item .name { width: 50px; text-align: right; }
+.dist-item .bar { height: 18px; border-radius: 3px; min-width: 4px; }
+.dist-item .count { font-size: 12px; color: var(--c-text-light); width: 30px; }
+
+/* Excel import */
+.import-zone {
+  border: 2px dashed var(--c-border); border-radius: 8px; padding: 16px;
+  text-align: center; margin-bottom: 12px; background: #fafafa;
+}
+.import-zone:hover { border-color: var(--c-primary-ink); background: #F7FEE7; }
+.import-zone input[type=file] { display: none; }
+/* Status badges */
+.badge { display: inline-block; padding: 2px 10px; border-radius: 12px; font-size: 12px; font-weight: 600; }
+.badge-green { background: #C6EFCE; color: #006100; }
+.badge-red { background: #FFC7CE; color: #9C0006; }
+.badge-yellow { background: #FFEB9C; color: #9C6500; }
+.badge-blue { background: #BDD7EE; color: #1F4E79; }
+.badge-gray { background: #E8E8E8; color: #666; }
+/* Cards */
+.card { background: var(--c-card-bg); border-radius: 8px; padding: 16px; box-shadow: var(--c-shadow); margin-bottom: 16px; }
+.card h3 { font-size: 15px; color: var(--c-primary-ink); margin-bottom: 12px; border-bottom: 2px solid var(--c-primary-light); padding-bottom: 8px; }
+/* Stats cards */
+.stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; margin-bottom: 16px; }
+.stat-card { background: #fff; border-radius: 8px; padding: 16px; box-shadow: var(--c-shadow); text-align: center; }
+.stat-card .num { font-size: 28px; font-weight: 700; color: var(--c-primary-ink); }
+.stat-card .label { font-size: 13px; color: var(--c-text-light); margin-top: 4px; }
+.stat-card.danger .num { color: var(--c-danger); }
+.stat-card.success .num { color: var(--c-success); }
+.stat-card.warning .num { color: var(--c-warning); }
+/* Filter bar */
+.filter-bar { display: flex; gap: 12px; align-items: center; margin-bottom: 12px; flex-wrap: wrap; }
+.filter-bar select, .filter-bar input { padding: 6px 10px; border: 1px solid var(--c-border); border-radius: 4px; font-size: 14px; font-family: inherit; }
+.filter-bar label { font-size: 14px; color: var(--c-text-light); }
+/* Modal */
+.modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; justify-content: center; align-items: center; }
+.modal-overlay.show { display: flex; }
+.modal { background: #fff; border-radius: 8px; padding: 24px; min-width: 420px; max-width: 600px; max-height: 90vh; overflow-y: auto; }
+.modal h3 { font-size: 18px; color: var(--c-primary-ink); margin-bottom: 16px; }
+.modal .form-group { margin-bottom: 12px; }
+.modal .form-group label { display: block; font-size: 14px; color: var(--c-text-light); margin-bottom: 4px; }
+.modal .form-group input, .modal .form-group select, .modal .form-group textarea {
+  width: 100%; padding: 8px; border: 1px solid var(--c-border); border-radius: 4px; font-size: 14px; font-family: inherit;
+}
+.modal .form-group textarea { resize: vertical; min-height: 60px; }
+.modal .modal-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 16px; }
+/* Toast */
+#toast { position: fixed; top: 20px; right: 20px; z-index: 2000; display: flex; flex-direction: column; gap: 8px; }
+.toast { padding: 12px 20px; border-radius: 4px; color: #fff; font-size: 14px; box-shadow: 0 2px 8px rgba(0,0,0,0.2); animation: slideIn 0.3s ease; }
+.toast.success { background: var(--c-success); }
+.toast.error { background: var(--c-danger); }
+.toast.info { background: var(--c-primary); color: #111827; font-weight: 600; }
+.toast.warning { background: var(--c-warning); color: #333; }
+@keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+/* Calendar */
+.calendar-table { width: 100%; border-collapse: collapse; }
+.calendar-table th { background: var(--c-head-bg); color: #F3F4F6; padding: 7px 5px; font-size: 12px; min-width: 36px; }
+.calendar-table td { border: 1px solid #e8eaed; padding: 5px 4px; text-align: center; font-size: 12px; min-height: 28px; }
+.calendar-table td.member-name { font-weight: 600; text-align: left; padding-left: 8px; background: #f0f0f0; white-space: nowrap; position: sticky; left: 0; z-index: 1; }
+.calendar-table td.empty { background: #fff; }
+/* Check-in dialog */
+.checkin-dialog { text-align: center; }
+.checkin-dialog .member-info { background: var(--c-primary-light); padding: 16px; border-radius: 8px; margin-bottom: 16px; }
+.checkin-dialog .member-info h4 { font-size: 20px; color: var(--c-primary-ink); }
+.checkin-dialog .planned-training { font-size: 16px; margin: 8px 0; }
+.checkin-dialog .planned-training .label { color: var(--c-text-light); }
+.checkin-dialog .training-select { margin: 16px 0; text-align: left; }
+.checkin-dialog .training-select label { display: block; font-size: 14px; color: #666; margin-bottom: 6px; font-weight: 600; }
+.checkin-dialog .training-select select { padding: 10px 14px; font-size: 16px; border: 2px solid var(--c-primary-dark); border-radius: 4px; width: 100%; }
+.checkin-dialog .custom-input { margin-top: 10px; display: none; }
+.checkin-dialog .custom-input.show { display: block; }
+.checkin-dialog .custom-input input {
+  width: 100%; padding: 10px 14px; font-size: 16px; border: 2px solid var(--c-primary-dark);
+  border-radius: 4px; font-family: inherit;
+}
+.checkin-dialog .actions { display: flex; gap: 10px; justify-content: center; margin-top: 20px; }
+.checkin-dialog .actions .btn { flex: 1; max-width: 200px; }
+.checkin-dialog .actions .btn-confirm { padding: 12px 24px; font-size: 17px; font-weight: 700; border-radius: 6px; }
+/* Color legend */
+.color-legend { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 12px; }
+.color-legend .item { display: flex; align-items: center; gap: 6px; font-size: 13px; }
+.color-legend .swatch { width: 16px; height: 16px; border-radius: 3px; border: 1px solid #ccc; }
+/* Member card for dashboard */
+.member-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 12px; }
+.member-card { background: #fff; border-radius: 8px; padding: 14px; box-shadow: var(--c-shadow); border-left: 4px solid var(--c-primary); }
+.member-card.checked { border-left-color: var(--c-success); }
+.member-card .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+.member-card .name { font-size: 16px; font-weight: 700; }
+.member-card .id {
+  font-size: 15px; font-weight: 700; color: var(--c-primary-ink);
+  background: var(--c-primary-light); padding: 2px 8px; border-radius: 4px;
+  margin-left: 6px; display: inline-block;
+}
+.member-card .info { font-size: 13px; color: var(--c-text-light); margin-bottom: 6px; }
+.member-card .training { display: inline-block; padding: 2px 10px; border-radius: 3px; font-size: 13px; font-weight: 600; }
+.member-card .status { margin-top: 4px; }
+.member-card .actions { margin-top: 10px; display: flex; gap: 8px; }
+.member-card .actions .btn { flex: 1; justify-content: center; padding: 9px 12px; font-size: 14px; }
+.member-card .actions .btn-checkin {
+  flex: 1; justify-content: center; padding: 12px 12px; font-size: 16px; font-weight: 700;
+  background: var(--c-success); color: #fff; border-radius: 6px;
+}
+.member-card .actions .btn-checkin:hover { background: #5d9a3c; }
+/* Scrollable table */
+.table-scroll { overflow: auto; }
+.table-scroll thead th { position: sticky; top: 0; z-index: 2; }
+.page.active { min-height: calc(100vh - 32px); }
+/* Empty state */
+.empty-state { text-align: center; padding: 40px; color: var(--c-text-light); }
+.empty-state .icon { font-size: 48px; margin-bottom: 12px; }
+/* Form inline */
+.form-inline { display: flex; gap: 8px; align-items: flex-end; flex-wrap: wrap; }
+.form-inline .form-group { display: flex; flex-direction: column; gap: 4px; }
+.form-inline .form-group label { font-size: 12px; color: var(--c-text-light); }
+.form-inline input, .form-inline select { padding: 6px 10px; border: 1px solid var(--c-border); border-radius: 4px; font-size: 13px; }
+/* FAQ */
+.faq-section { margin-bottom: 20px; }
+.faq-section h3 { font-size: 16px; color: var(--c-primary-ink); margin-bottom: 10px; padding-bottom: 6px; border-bottom: 2px solid var(--c-primary-light); }
+.faq-item { background: #fff; border-radius: 6px; padding: 12px 16px; margin-bottom: 8px; box-shadow: var(--c-shadow); }
+.faq-item .question { font-weight: 600; color: var(--c-primary-ink); margin-bottom: 6px; }
+.faq-item .answer { color: var(--c-text-light); font-size: 13px; line-height: 1.6; }
+.faq-item .answer .tag { display: inline-block; padding: 1px 6px; border-radius: 3px; font-size: 11px; margin-right: 4px; }
+.nav-short { display: none; }
+.btn:active { transform: translateY(1px); }
+
+/* ============ 手机端适配 ============ */
+@media (max-width: 768px) {
+  /* 侧边栏 → 底部 Tab 导航 */
+  #sidebar {
+    top: auto; bottom: 0; left: 0; width: 100%; height: auto;
+    flex-direction: row; overflow: visible;
+    box-shadow: 0 -2px 12px rgba(15,23,42,0.08);
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  #sidebar .logo, #sidebar .footer { display: none; }
+  #sidebar .nav { display: flex; flex: 1; padding: 0; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  #sidebar .nav::-webkit-scrollbar { display: none; }
+  #sidebar .nav-item {
+    flex: 1; min-width: 54px; flex-direction: column; gap: 3px;
+    padding: 8px 2px; font-size: 11px; justify-content: center; text-align: center;
+    border-left: none; border-top: 3px solid transparent;
+  }
+  #sidebar .nav-item.active {
+    background: linear-gradient(180deg, rgba(190,242,100,0.20), rgba(190,242,100,0.03));
+    border-left: none; border-top-color: var(--c-primary);
+  }
+  #sidebar .nav-item .icon { font-size: 19px; width: auto; }
+  .nav-full { display: none; }
+  .nav-short { display: inline; }
+
+  /* 主内容区让出底部导航 */
+  #main { margin-left: 0; padding: 12px 12px calc(80px + env(safe-area-inset-bottom)); }
+  .page.active { min-height: auto; }
+  .page-header { flex-wrap: wrap; gap: 10px; }
+  .page-header h2 { font-size: 18px; }
+  .page-header .actions { width: 100%; flex-wrap: wrap; }
+  .page-header .actions .btn { flex: 1; justify-content: center; min-height: 44px; }
+  .color-bar { gap: 12px; padding: 8px 12px; font-size: 12px; overflow-x: auto; margin-bottom: 10px; }
+  .color-bar .label { display: none; }
+  .save-status { position: sticky; right: 0; background: var(--c-card-bg); padding-left: 10px; }
+
+  /* 首页问候横幅：手机上缩小字号，保持居中 */
+  .dash-hero { padding: 18px 14px; gap: 4px; }
+  .hero-left { gap: 10px; }
+  .hero-date { font-size: 13px; }
+  .hero-time { font-size: 32px; }
+  .hero-greet { font-size: 16px; }
+  .hero-quote { font-size: 18px; max-width: none; }
+  .hero-sub { font-size: 12px; }
+
+  /* 统计卡两列、会员卡单列 */
+  .stats-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+  .stat-card { padding: 12px 8px; }
+  .stat-card .num { font-size: 24px; }
+  .stat-card .label { font-size: 12px; }
+  .member-cards { grid-template-columns: 1fr; }
+
+  /* 数据表 → 卡片列表 */
+  .table-wrap { background: transparent; box-shadow: none; }
+  #memberTable, #recordTable, #statsTable, #paramTable { display: block; }
+  #memberTable thead, #recordTable thead, #statsTable thead, #paramTable thead { display: none; }
+  #memberTable tr, #recordTable tr, #statsTable tr, #paramTable tr {
+    display: block; background: #fff; border-radius: 10px; margin-bottom: 10px;
+    box-shadow: var(--c-shadow); padding: 4px 0; border-left: 4px solid var(--c-primary);
+  }
+  #memberTable tbody tr:nth-child(even), #recordTable tbody tr:nth-child(even),
+  #statsTable tbody tr:nth-child(even), #paramTable tbody tr:nth-child(even) { background: #fff; }
+  #memberTable td, #recordTable td, #statsTable td, #paramTable td {
+    display: flex; justify-content: space-between; align-items: center; gap: 14px;
+    text-align: right; padding: 8px 12px; border-bottom: 1px dashed #f0f1f3; font-size: 14px;
+  }
+  #memberTable td:last-child, #recordTable td:last-child,
+  #statsTable td:last-child, #paramTable td:last-child { border-bottom: none; flex-wrap: wrap; }
+  #memberTable td::before, #recordTable td::before, #statsTable td::before, #paramTable td::before {
+    content: attr(data-label); font-size: 12px; color: var(--c-text-light);
+    text-align: left; flex-shrink: 0; font-weight: 500;
+  }
+  #memberTable td:first-child, #recordTable td:first-child,
+  #statsTable td:first-child, #paramTable td:first-child {
+    font-size: 16px; font-weight: 600; border-bottom: 1px solid #f0f1f3; padding: 11px 12px;
+  }
+  #memberTable td.empty-state, #recordTable td.empty-state,
+  #statsTable td.empty-state, #paramTable td.empty-state {
+    display: block; border-left: none; box-shadow: var(--c-shadow); border-radius: 10px;
+  }
+  #memberTable td.empty-state::before, #recordTable td.empty-state::before,
+  #statsTable td.empty-state::before, #paramTable td.empty-state::before { content: none; }
+
+  /* 触摸友好尺寸 */
+  .btn { min-height: 44px; padding: 10px 16px; font-size: 15px; }
+  .btn-sm { min-height: 36px; padding: 7px 12px; font-size: 13px; }
+  .btn-lg { min-height: 50px; font-size: 17px; }
+  input, select, textarea { font-size: 16px !important; }
+  #memberSearch, #recordSearch, #coachFilter { width: 100% !important; min-height: 44px; }
+  .filter-bar { flex-direction: column; align-items: stretch; gap: 8px; }
+  .filter-bar select, .filter-bar input { width: 100%; min-height: 44px; }
+  .form-inline { flex-direction: column; align-items: stretch; }
+  .form-inline .form-group { flex-direction: column; align-items: stretch; }
+
+  /* 弹窗从底部升起 */
+  .modal-overlay { align-items: flex-end; }
+  .modal {
+    min-width: auto; width: 100%; max-width: 100%; max-height: 88vh;
+    border-radius: 18px 18px 0 0; padding: 20px 16px calc(20px + env(safe-area-inset-bottom));
+  }
+  .detail-grid { grid-template-columns: 1fr; }
+  .checkin-dialog .actions .btn { max-width: none; }
+
+  /* 日历横滑 + 字号放大 */
+  .calendar-table th { font-size: 12px; padding: 7px 5px; }
+  .calendar-table td { font-size: 12px; padding: 7px 5px; }
+  .calendar-table td.member-name { font-size: 13px; }
+
+  .empty-state { padding: 32px 16px; }
+  .card { padding: 13px; }
+  .faq-section h3 { font-size: 15px; }
+  .toast { font-size: 14px; padding: 13px 18px; }
+}
+
+/* ============ 打印适配 ============ */
+@media print {
+  #sidebar, .color-bar, .page-header .actions, .modal-overlay, #toast { display: none !important; }
+  #main { margin: 0; padding: 0; }
+  body { background: #fff; }
+  .table-wrap, .card { box-shadow: none; border: 1px solid #ddd; }
+  .page { display: none !important; }
+  .page.active { display: block !important; }
+  thead th { background: #f0f0f0 !important; color: #000 !important; }
+}
+</style>
+</head>
+<body>
+
+<!-- Sidebar -->
+<div id="sidebar">
+  <div class="logo">
+    <h1 id="systemNameDisplay" onclick="editSystemName()" title="点击修改系统名称" style="cursor:pointer;">大姚健身管理系统</h1>
+    <p>健身会员管理工作台</p>
+  </div>
+  <div class="nav">
+    <div class="nav-item active" data-page="dashboard" onclick="navigateTo('dashboard')">
+      <span class="icon">🏠</span><span class="nav-full">首页</span><span class="nav-short">首页</span>
+    </div>
+    <div class="nav-item" data-page="members" onclick="navigateTo('members')">
+      <span class="icon">👥</span><span class="nav-full">会员数据库</span><span class="nav-short">会员</span>
+    </div>
+    <div class="nav-item" data-page="records" onclick="navigateTo('records')">
+      <span class="icon">📋</span><span class="nav-full">训练记录</span><span class="nav-short">记录</span>
+    </div>
+    <div class="nav-item" data-page="stats" onclick="navigateTo('stats')">
+      <span class="icon">📊</span><span class="nav-full">数据统计</span><span class="nav-short">统计</span>
+    </div>
+    <div class="nav-item" data-page="calendar" onclick="navigateTo('calendar')">
+      <span class="icon">📅</span><span class="nav-full">月度训练日历</span><span class="nav-short">日历</span>
+    </div>
+    <div class="nav-item" data-page="params" onclick="navigateTo('params')">
+      <span class="icon">⚙️</span><span class="nav-full">参数</span><span class="nav-short">参数</span>
+    </div>
+    <div class="nav-item" data-page="faq" onclick="navigateTo('faq')">
+      <span class="icon">❓</span><span class="nav-full">常见问题</span><span class="nav-short">帮助</span>
+    </div>
+  </div>
+  <div class="footer">
+    <div>数据来源: 大姚健身会员管理系统1.xlsm</div>
+    <div style="margin-top:4px;">VBA功能 Web版</div>
+  </div>
+</div>
+
+<!-- Main Content -->
+<div id="main">
+  <!-- Fixed color bar (replaces repeated legends) -->
+  <div class="color-bar">
+    <span class="label">训练颜色：</span>
+    <div class="item"><div class="swatch" style="background:var(--c-chest)"></div>胸肩</div>
+    <div class="item"><div class="swatch" style="background:var(--c-back)"></div>背</div>
+    <div class="item"><div class="swatch" style="background:var(--c-glute)"></div>臀/腿</div>
+    <div class="item"><div class="swatch" style="background:var(--c-core)"></div>核心</div>
+    <div class="item"><div class="swatch" style="background:var(--c-cardio)"></div>心肺</div>
+    <span id="cloudStatus" class="cloud-status" title="云同步：多设备共享同一份数据">
+      <span class="dot"></span><span class="txt">云同步未开启</span>
+    </span>
+    <span id="saveStatus" class="save-status" title="数据保存在本浏览器，签到/修改即时写入">
+      <span class="dot"></span><span class="txt">—</span>
+    </span>
+  </div>
+
+  <!-- Dashboard Page (首页) -->
+  <div id="page-dashboard" class="page active">
+    <div class="dash-hero">
+      <div class="hero-left">
+        <div class="hero-date" id="heroDate">今天</div>
+        <div class="hero-time" id="heroTime">--:--<span class="sec">:--</span></div>
+      </div>
+      <div class="hero-right">
+        <div class="hero-greet" id="heroGreet">你好！</div>
+        <div class="hero-quote" id="heroQuote" onclick="nextHeroQuote()" title="点一下换一句">—</div>
+        <div class="hero-sub" id="heroSub"></div>
+      </div>
+    </div>
+
+    <div class="page-header">
+      <h2>🏠 首页 - 会员签到工作台</h2>
+      <div class="actions">
+        <select id="coachFilter" onchange="applyCoachFilter()" style="padding:8px 16px;border:1px solid var(--c-border);border-radius:4px;font-size:14px;">
+          <option value="">全部教练</option>
+        </select>
+        <button class="btn btn-primary" onclick="refreshDashboard()">🔄 刷新首页</button>
+      </div>
+    </div>
+
+    <div class="stats-grid" id="dashStats"></div>
+
+    <div class="card">
+      <h3>会员签到列表 <span id="memberCount" style="font-size:13px;font-weight:400;color:var(--c-text-light);"></span></h3>
+      <div class="member-cards" id="dashboardCards"></div>
+    </div>
+  </div>
+
+  <!-- Member Database Page (会员数据库) -->
+  <div id="page-members" class="page">
+    <div class="page-header">
+      <h2>👥 会员数据库</h2>
+      <div class="actions">
+        <input type="text" id="memberSearch" placeholder="搜索姓名/编号..." oninput="renderMembers()" style="padding:8px 12px;border:1px solid var(--c-border);border-radius:4px;font-size:14px;width:180px;">
+        <button class="btn btn-success" onclick="showMemberModal()">➕ 新增会员</button>
+        <button class="btn btn-primary" onclick="syncAllMembers()">🔄 同步训练状态</button>
+      </div>
+    </div>
+    <div class="table-wrap">
+      <div class="table-scroll">
+        <table id="memberTable">
+          <thead>
+            <tr>
+              <th>会员编号</th><th>会员姓名</th><th>教练</th><th>上一次训练</th>
+              <th>下一次训练</th><th>最后训练日期</th><th>训练顺序</th>
+              <th>备注</th><th>操作</th>
+            </tr>
+          </thead>
+          <tbody id="memberTableBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Training Records Page (训练记录) -->
+  <div id="page-records" class="page">
+    <div class="page-header">
+      <h2>📋 训练记录</h2>
+      <div class="actions">
+        <input type="text" id="recordSearch" placeholder="搜索姓名/内容..." oninput="renderRecords()" style="padding:8px 12px;border:1px solid var(--c-border);border-radius:4px;font-size:14px;width:180px;">
+        <button class="btn btn-success" onclick="showRecordModal()">➕ 新增记录</button>
+      </div>
+    </div>
+    <div class="table-wrap">
+      <div class="table-scroll">
+        <table id="recordTable">
+          <thead>
+            <tr>
+              <th>日期</th><th>会员编号</th><th>会员姓名</th><th>教练</th>
+              <th>训练内容</th><th>是否临时更换</th><th>备注</th><th>操作</th>
+            </tr>
+          </thead>
+          <tbody id="recordTableBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Data Statistics Page (数据统计) -->
+  <div id="page-stats" class="page">
+    <div class="page-header">
+      <h2>📊 数据统计</h2>
+      <div class="actions">
+        <button class="btn btn-primary" onclick="updateStats(true)">🔄 更新数据统计</button>
+      </div>
+    </div>
+    <div class="stats-grid" id="statsOverview"></div>
+    <div class="table-wrap">
+      <div class="table-scroll">
+        <table id="statsTable">
+          <thead>
+            <tr>
+              <th>会员姓名</th><th>教练</th><th>最近训练</th><th>距离今天</th>
+              <th>本周次数</th><th>本月次数</th><th>训练达标</th>
+              <th>胸肩</th><th>背</th><th>臀腿</th><th>核心</th><th>心肺</th>
+            </tr>
+          </thead>
+          <tbody id="statsTableBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Monthly Calendar Page (月度训练日历) -->
+  <div id="page-calendar" class="page">
+    <div class="page-header">
+      <h2>📅 月度训练日历</h2>
+      <div class="actions">
+        <label>查询月份：</label>
+        <input type="month" id="calendarMonth" onchange="renderCalendar()" style="padding:8px 12px;border:1px solid var(--c-border);border-radius:4px;font-size:14px;">
+        <button class="btn btn-primary" onclick="renderCalendar()">📅 生成月度训练日历</button>
+      </div>
+    </div>
+    <div class="table-wrap">
+      <div class="table-scroll">
+        <table class="calendar-table" id="calendarTable"></table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Parameters Page (参数) -->
+  <div id="page-params" class="page">
+    <div class="page-header">
+      <h2>⚙️ 参数配置</h2>
+      <div class="actions">
+        <button class="btn btn-success" onclick="showParamModal()">➕ 新增参数</button>
+        <button class="btn btn-primary" onclick="syncColorRules()">🎨 同步训练颜色规则</button>
+        <button class="btn btn-warning" onclick="document.getElementById('excelFileInput').click()">📥 导入Excel</button>
+        <input type="file" id="excelFileInput" accept=".xlsm,.xlsx,.xls" onchange="handleExcelImport(this)">
+      </div>
+    </div>
+    <div class="import-zone" onclick="document.getElementById('excelFileInput').click()">
+      <p style="font-size:14px;color:var(--c-text-light);">📥 点击此处导入 Excel 文件（.xlsm / .xlsx）</p>
+      <p style="font-size:12px;color:#999;margin-top:4px;">支持导入：会员数据库、训练记录、参数 三个工作表</p>
+    </div>
+    <div class="card">
+      <h3>训练内容参数（对应 Excel 参数表）</h3>
+      <p style="font-size:13px;color:var(--c-text-light);margin-bottom:12px;">参数表定义了训练内容的颜色映射、训练顺序和关键词别名。系统会根据这些参数自动为训练内容上色。</p>
+      <div class="table-wrap">
+        <table id="paramTable">
+          <thead>
+            <tr>
+              <th>参数类型</th><th>当前训练</th><th>下一阶段</th><th>关键词/别名</th>
+              <th>是否启用</th><th>排序</th><th>颜色</th><th>操作</th>
+            </tr>
+          </thead>
+          <tbody id="paramTableBody"></tbody>
+        </table>
+      </div>
+    </div>
+    <div class="card">
+      <h3>训练内容颜色对照</h3>
+      <div class="color-legend" style="font-size:14px;">
+        <div class="item"><div class="swatch" style="background:var(--c-chest)"></div>胸肩 (浅橙)</div>
+        <div class="item"><div class="swatch" style="background:var(--c-back)"></div>背 (浅蓝)</div>
+        <div class="item"><div class="swatch" style="background:var(--c-glute)"></div>臀/腿 (浅绿)</div>
+        <div class="item"><div class="swatch" style="background:var(--c-core)"></div>核心 (浅黄)</div>
+        <div class="item"><div class="swatch" style="background:var(--c-cardio)"></div>心肺 (浅紫)</div>
+      </div>
+    </div>
+    <div class="card">
+      <h3>数据备份与恢复</h3>
+      <p style="font-size:13px;color:var(--c-text-light);margin-bottom:12px;line-height:1.7;">
+        数据保存在本机浏览器中，<b style="color:var(--c-danger);">清理浏览器缓存、更换电脑或浏览器会导致数据全部丢失</b>。建议每周导出一次备份文件存到网盘或U盘。<br>
+        导错了文件也不用慌：系统会自动留存「导入前」的数据，点 <b>↩️ 恢复导入前的数据</b> 就能一键还原。
+      </p>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;">
+        <button class="btn btn-primary" onclick="exportJSON()">导出 JSON 完整备份</button>
+        <button class="btn btn-default" onclick="document.getElementById('jsonFileInput').click()">导入备份恢复</button>
+        <button class="btn btn-success" onclick="exportCSV()">导出训练记录 CSV</button>
+        <button class="btn btn-warning" onclick="restoreSnapshot()">↩️ 恢复导入前的数据</button>
+        <input type="file" id="jsonFileInput" accept=".json,application/json" style="display:none;" onchange="importJSON(this)">
+      </div>
+      <div id="backupInfo" style="margin-top:12px;font-size:12px;color:var(--c-text-light);"></div>
+    </div>
+
+    <div class="card">
+      <h3>☁️ 云同步（多设备共享同一份数据）</h3>
+      <p style="font-size:13px;color:var(--c-text-light);margin-bottom:12px;line-height:1.8;">
+        开启后，店里、你的电脑、手机都读写<b>同一份数据</b>：谁签到一个会员，所有设备立刻能看到。<br>
+        推荐用 <b>GitHub 存档</b>：<b>永久免费、不收一分钱、没有到期时间</b>，只需注册一个免费账号。
+      </p>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+        <span style="font-size:13px;">同步通道：</span>
+        <select id="cloudChannel" onchange="switchCloudChannel()" style="padding:8px 12px;border:1px solid var(--c-border);border-radius:4px;font-size:14px;">
+          <option value="">— 未开启 —</option>
+          <option value="gist">GitHub 存档（推荐 · 永久免费）</option>
+          <option value="cloudbase">腾讯云开发（6 个月到期，需续费）</option>
+        </select>
+      </div>
+
+      <div id="gistCfg" style="display:none;margin-top:10px;">
+        <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+          <input type="password" id="gistToken" placeholder="GitHub Token（只勾 Gists 读写）" style="padding:8px 12px;border:1px solid var(--c-border);border-radius:4px;font-size:16px;min-width:230px;">
+          <input type="text" id="gistId" placeholder="存档ID（点右侧创建后自动填入）" style="padding:8px 12px;border:1px solid var(--c-border);border-radius:4px;font-size:16px;min-width:230px;">
+          <button class="btn btn-default" onclick="gistCreate()">🆕 创建云端存档</button>
+          <button class="btn btn-primary" onclick="syncTest()">🔌 连接测试</button>
+        </div>
+        <p style="font-size:12px;color:var(--c-text-light);margin-top:8px;line-height:1.8;">
+          Token 只保存在这台设备的浏览器里，不会上传到任何地方；每台设备都要填一次（存档ID 填同一个）。
+        </p>
+      </div>
+
+      <div id="cloudbaseCfg" style="display:none;margin-top:10px;">
+        <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+          <input type="text" id="cloudEnvId" placeholder="云开发环境ID，如 gym-1g8xxxxxxx" style="padding:8px 12px;border:1px solid var(--c-border);border-radius:4px;font-size:16px;min-width:230px;">
+          <button class="btn btn-primary" onclick="cloudConnect()">🔌 连接测试</button>
+        </div>
+        <p style="font-size:12px;color:var(--c-text-light);margin-top:8px;line-height:1.8;">
+          需要先在控制台开启「匿名登录」，并把当前网址加入 Web 安全域名。
+        </p>
+      </div>
+
+      <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:10px;">
+        <button class="btn btn-success" onclick="syncUpload()">⬆️ 上传到云端</button>
+        <button class="btn btn-default" onclick="syncPull()">⬇️ 从云端拉取（合并）</button>
+        <label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer;">
+          <input type="checkbox" id="cloudAuto" onchange="toggleCloudAuto()" style="width:18px;height:18px;"> 自动同步
+        </label>
+      </div>
+      <div id="cloudInfo" style="margin-top:12px;font-size:12px;color:var(--c-text-light);line-height:1.9;"></div>
+    </div>
+  </div>
+
+  <!-- FAQ Page (常见问题) -->
+  <div id="page-faq" class="page">
+    <div class="page-header">
+      <h2>❓ 常见问题与小Tips</h2>
+    </div>
+    <div class="card">
+      <h3>适用于：首页、会员数据库、训练记录、数据统计、月度训练日历、参数、说明</h3>
+      <p style="font-size:13px;color:var(--c-text-light);">更新时间：2026/07/16</p>
+    </div>
+    <div id="faqContent"></div>
+  </div>
+</div>
+
+<!-- Modal -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal" id="modalContent"></div>
+</div>
+
+<!-- Toast container -->
+<div id="toast"></div>
+
+<!-- SheetJS for Excel import -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
+<script>
+// ===================== DATA & STORAGE =====================
+const STORAGE_KEY = 'gym_management_data';
+const COLOR_MAP = {
+  '胸肩': { color: '#F4B084', class: 'tc-chest' },
+  '背': { color: '#9DC3E6', class: 'tc-back' },
+  '臀': { color: '#A9D08E', class: 'tc-glute' },
+  '臀腿': { color: '#A9D08E', class: 'tc-glute' },
+  '腿': { color: '#A9D08E', class: 'tc-glute' },
+  '下肢': { color: '#A9D08E', class: 'tc-glute' },
+  '核心': { color: '#FFD966', class: 'tc-core' },
+  '心肺': { color: '#CCC0DA', class: 'tc-cardio' },
+  '心肺1': { color: '#CCC0DA', class: 'tc-cardio' },
+  '心肺2': { color: '#CCC0DA', class: 'tc-cardio' },
+  '肩': { color: '#F4B084', class: 'tc-chest' },
+  '胸部': { color: '#F4B084', class: 'tc-chest' },
+  '肩部': { color: '#F4B084', class: 'tc-chest' },
+  '背部': { color: '#9DC3E6', class: 'tc-back' },
+  '胸肩部': { color: '#F4B084', class: 'tc-chest' },
+  '手臂腹': { color: '#FFD966', class: 'tc-core' },
+  '对位训练': { color: '#FFD966', class: 'tc-core' },
+};
+
+const PARAM_COLOR_MAP = {
+  '浅橙': '#F4B084', '浅蓝': '#9DC3E6', '浅绿': '#A9D08E',
+  '浅黄': '#FFD966', '浅紫': '#CCC0DA',
+  '红色': '#FFC7CE', '深黄': '#FFC000', '深蓝': '#2F5496',
+  '深橙': '#E69138', '藏青': '#1F4E79', '绿色': '#70AD47',
+};
+
+// Embedded initial data from Excel
+const INITIAL_DATA = {
+  systemName: '大姚健身管理系统',
+  members: [
+    {id:"9",name:"小应",coach:"姚伟乙",lastTraining:"胸肩",nextTraining:"背",lastDate:"2026-08-03 20:14:52",sequence:"臀,胸肩,背",trainingNote:"核心、胸肩、臀、背都有规律",note:"肩不用练宽  8.14 增肌冲刺 35kg  15"},
+    {id:"8",name:"呱",coach:"姚伟乙",lastTraining:"",nextTraining:"臀",lastDate:"2026-07-29 19:24:10",sequence:"臀,胸肩,背",trainingNote:"背、胸肩、臀为主，心肺/核心穿插",note:""},
+    {id:"7",name:"欣佳",coach:"姚伟乙",lastTraining:"背",nextTraining:"臀",lastDate:"2026-08-03 21:13:42",sequence:"臀,胸肩,背",trainingNote:"背、胸肩、臀为主，核心心肺像临时调整",note:"减脂到九月十六减到97"},
+    {id:"6",name:"小刘",coach:"姚伟乙",lastTraining:"背",nextTraining:"臀",lastDate:"2026-08-03 21:14:33",sequence:"臀,胸肩,背",trainingNote:"背、胸肩、臀为主，心肺偶尔出现",note:"减脂到九月十六减到一百一"},
+    {id:"5",name:"珍珍",coach:"姚伟乙",lastTraining:"心肺",nextTraining:"心肺",lastDate:"2026-07-26 15:37:29",sequence:"心肺",trainingNote:"几乎都是心肺",note:""},
+    {id:"4",name:"洋洋",coach:"姚伟乙",lastTraining:"臀",nextTraining:"胸肩",lastDate:"2026-08-03 11:12:54",sequence:"臀,胸肩,背",trainingNote:"臀、背、胸肩比较稳定",note:"硬拉25公斤 引体20公斤 推举7.5公斤"},
+    {id:"3",name:"tt",coach:"姚伟乙",lastTraining:"背",nextTraining:"胸肩",lastDate:"2026-08-03 11:12:44",sequence:"胸肩,背,手臂腹",trainingNote:"明显胸肩和背为主，臀/核心偶尔出现",note:""},
+    {id:"29",name:"方",coach:"姚伟乙",lastTraining:"心肺",nextTraining:"心肺",lastDate:"2026-07-26 15:37:33",sequence:"心肺",trainingNote:"只有一次心肺记录",note:""},
+    {id:"28",name:"烧鸡",coach:"姚伟乙",lastTraining:"胸肩",nextTraining:"背",lastDate:"2026-08-03 11:57:51",sequence:"臀,胸肩,背",trainingNote:"只有背、臀两次记录，信息不足",note:""},
+    {id:"27",name:"小张",coach:"姚伟乙",lastTraining:"胸肩",nextTraining:"心肺2",lastDate:"2026-08-03 13:39:31",sequence:"胸肩,心肺1,背,心肺2,腿",trainingNote:"心肺穿插在各部位之间",note:""},
+    {id:"26",name:"啊陈",coach:"姚伟乙",lastTraining:"肩",nextTraining:"核心",lastDate:"2026-08-03 17:15:20",sequence:"核心,肩,背,腿",trainingNote:"背、胸肩、核心为主，臀偶尔出现",note:""},
+    {id:"25",name:"王总",coach:"姚伟乙",lastTraining:"背",nextTraining:"胸部",lastDate:"2026-08-03 13:39:51",sequence:"胸部,肩部,背部",trainingNote:"明显胸肩和背循环，且胸肩频率更高",note:""},
+    {id:"24",name:"大蓝",coach:"姚伟乙",lastTraining:"胸肩",nextTraining:"背",lastDate:"2026-07-31 11:54:56",sequence:"胸肩,心肺1,背,心肺2,腿",trainingNote:"心肺为主，背/核心/胸肩穿插",note:""},
+    {id:"23",name:"石宁",coach:"姚伟乙",lastTraining:"臀",nextTraining:"胸肩",lastDate:"2026-08-03 17:36:27",sequence:"臀,胸肩,背,核心",trainingNote:"背、臀、核心比较明显",note:""},
+    {id:"22",name:"小祝",coach:"姚伟乙",lastTraining:"",nextTraining:"心肺",lastDate:"",sequence:"心肺",trainingNote:"只有一次呼吸/心肺记录",note:""},
+    {id:"21",name:"小陈",coach:"姚伟乙",lastTraining:"腿",nextTraining:"胸肩",lastDate:"2026-08-02 19:04:50",sequence:"胸肩,心肺1,背,心肺2,腿",trainingNote:"心肺、臀、胸肩、背都有，偏综合训练",note:""},
+    {id:"20",name:"小林",coach:"姚伟乙",lastTraining:"胸肩",nextTraining:"心肺1",lastDate:"2026-07-31 11:54:44",sequence:"胸肩,心肺1,背,心肺2,腿",trainingNote:"心肺明显为主",note:""},
+    {id:"2",name:"卷卷",coach:"姚伟乙",lastTraining:"胸肩",nextTraining:"背",lastDate:"2026-08-02 17:17:20",sequence:"臀,胸肩,背",trainingNote:"胸肩、背、臀为主，核心只是穿插",note:"减脂 肩胛骨问题"},
+    {id:"19",name:"尤",coach:"姚伟乙",lastTraining:"核心",nextTraining:"肩",lastDate:"2026-07-28 21:21:18",sequence:"背,胸,核心,肩",trainingNote:"背、臀、胸肩、核心都有",note:""},
+    {id:"18",name:"杰",coach:"姚伟乙",lastTraining:"",nextTraining:"背",lastDate:"",sequence:"背,腿,胸肩,心肺",trainingNote:"记录较少，暂按背、臀、胸肩循环",note:""},
+    {id:"17",name:"晶晶",coach:"姚伟乙",lastTraining:"胸肩",nextTraining:"心肺",lastDate:"2026-08-02 14:09:37",sequence:"心肺,臀,背,胸肩部",trainingNote:"心肺频率最高，臀为辅助",note:""},
+    {id:"16",name:"韦姐",coach:"姚伟乙",lastTraining:"臀",nextTraining:"背",lastDate:"2026-07-31 11:55:33",sequence:"心肺,臀,背,胸肩部",trainingNote:"背部频率最高，臀和胸肩辅助",note:"8.24减脂功能性 腰围6CM"},
+    {id:"15",name:"小蒋",coach:"姚伟乙",lastTraining:"背",nextTraining:"心肺2",lastDate:"2026-07-25 13:08:50",sequence:"胸肩,心肺1,背,心肺2,腿",trainingNote:"心肺和背为主，胸肩/臀偶尔出现",note:""},
+    {id:"14",name:"吴姐",coach:"姚伟乙",lastTraining:"臀",nextTraining:"背",lastDate:"2026-07-30 14:10:13",sequence:"心肺,臀,背,胸肩部",trainingNote:"心肺为主，臀/背穿插",note:""},
+    {id:"13",name:"何振",coach:"姚伟乙",lastTraining:"背",nextTraining:"心肺2",lastDate:"2026-08-03 20:15:05",sequence:"胸肩,心肺1,背,心肺2,腿",trainingNote:"心肺频率较高，同时穿插胸肩、背、臀",note:"8.14 减脂肚子平"},
+    {id:"12",name:"小胡",coach:"姚伟乙",lastTraining:"臀",nextTraining:"胸肩",lastDate:"2026-07-31 18:14:32",sequence:"臀,背,胸肩",trainingNote:"臀部频率明显最高，背为辅助",note:""},
+    {id:"11",name:"曹欣怡",coach:"姚伟乙",lastTraining:"背",nextTraining:"臀",lastDate:"2026-08-02 17:17:05",sequence:"臀,胸肩,背",trainingNote:"臀、背、胸肩为主，核心为调整项",note:""},
+    {id:"10",name:"小宋",coach:"姚伟乙",lastTraining:"心肺",nextTraining:"",lastDate:"2026-08-03 17:14:57",sequence:"心肺",trainingNote:"全部是心肺",note:""},
+    {id:"1",name:"婷",coach:"姚伟乙",lastTraining:"臀",nextTraining:"",lastDate:"2026-07-31 19:17:13",sequence:"臀,胸肩,背",trainingNote:"",note:"硬拉25 背10公斤"},
+    {id:"30",name:"wendy",coach:"姚伟乙",lastTraining:"心肺",nextTraining:"背",lastDate:"2026-08-03 21:13:22",sequence:"胸肩,背,臀,核心",trainingNote:"",note:"8.30 硬拉25公斤"},
+  ],
+  records: [
+    {date:"2026-07-21 15:59:15",memberId:"28",memberName:"烧鸡",coach:"姚伟乙",training:"背",tempChanged:"否",remark:"按原计划训练"},
+    {date:"2026-07-21 15:59:52",memberId:"27",memberName:"小张",coach:"姚伟乙",training:"心肺",tempChanged:"是",remark:"原计划：背；实际训练：心肺"},
+    {date:"2026-07-21 16:01:39",memberId:"2",memberName:"卷卷",coach:"姚伟乙",training:"胸肩",tempChanged:"否",remark:"按原计划训练"},
+    {date:"2026-07-21 17:27:38",memberId:"19",memberName:"尤",coach:"姚伟乙",training:"肩",tempChanged:"是",remark:"原计划：胸肩；实际训练：肩"},
+    {date:"2026-07-21 18:18:11",memberId:"5",memberName:"珍珍",coach:"姚伟乙",training:"胸肩",tempChanged:"是",remark:"原计划：心肺；实际训练：胸肩"},
+    {date:"2026-07-21 18:56:11",memberId:"9",memberName:"小应",coach:"姚伟乙",training:"臀",tempChanged:"否",remark:"按原计划训练"},
+    {date:"2026-07-24 17:15:10",memberId:"7",memberName:"欣佳",coach:"姚伟乙",training:"胸肩",tempChanged:"否",remark:"按原计划训练"},
+    {date:"2026-07-24 17:34:02",memberId:"23",memberName:"石宁",coach:"姚伟乙",training:"核心",tempChanged:"否",remark:"按原计划训练"},
+    {date:"2026-07-24 18:11:06",memberId:"4",memberName:"洋洋",coach:"姚伟乙",training:"胸肩",tempChanged:"否",remark:"按原计划训练"},
+    {date:"2026-07-24 19:31:50",memberId:"21",memberName:"小陈",coach:"姚伟乙",training:"腿",tempChanged:"否",remark:"按原计划训练"},
+    {date:"2026-07-24 20:03:27",memberId:"9",memberName:"小应",coach:"姚伟乙",training:"背",tempChanged:"是",remark:"原计划：胸肩；实际训练：背"},
+    {date:"2026-07-24 20:04:23",memberId:"13",memberName:"何振",coach:"姚伟乙",training:"心肺",tempChanged:"否",remark:"按原计划训练"},
+    {date:"2026-07-25 11:18:33",memberId:"24",memberName:"大蓝",coach:"姚伟乙",training:"胸肩",tempChanged:"否",remark:"按原计划训练"},
+    {date:"2026-07-25 11:18:50",memberId:"8",memberName:"呱",coach:"姚伟乙",training:"对位训练",tempChanged:"是",remark:"原计划：臀；实际训练：对位训练"},
+    {date:"2026-07-25 11:19:02",memberId:"14",memberName:"吴姐",coach:"姚伟乙",training:"背",tempChanged:"否",remark:"按原计划训练"},
+    {date:"2026-07-25 12:01:21",memberId:"20",memberName:"小林",coach:"姚伟乙",training:"心肺",tempChanged:"否",remark:"按原计划训练"},
+    {date:"2026-07-25 12:23:55",memberId:"6",memberName:"小刘",coach:"姚伟乙",training:"背",tempChanged:"否",remark:"按原计划训练"},
+    {date:"2026-07-25 13:08:50",memberId:"15",memberName:"小蒋",coach:"姚伟乙",training:"背",tempChanged:"否",remark:"按原计划训练"},
+    {date:"2026-07-25 13:27:14",memberId:"9",memberName:"小应",coach:"姚伟乙",training:"臀",tempChanged:"是",remark:"原计划：胸肩；实际训练：臀"},
+    {date:"2026-07-25 13:27:26",memberId:"13",memberName:"何振",coach:"姚伟乙",training:"背",tempChanged:"否",remark:"按原计划训练"},
+    {date:"2026-07-25 14:02:13",memberId:"4",memberName:"洋洋",coach:"姚伟乙",training:"背",tempChanged:"否",remark:"按原计划训练"},
+    {date:"2026-07-25 14:02:19",memberId:"3",memberName:"tt",coach:"姚伟乙",training:"背",tempChanged:"否",remark:"按原计划训练"},
+    {date:"2026-07-25 17:17:03",memberId:"23",memberName:"石宁",coach:"姚伟乙",training:"臀",tempChanged:"否",remark:"按原计划训练"},
+    {date:"2026-07-25 17:17:16",memberId:"27",memberName:"小张",coach:"姚伟乙",training:"背",tempChanged:"否",remark:"按原计划训练"},
+    {date:"2026-07-26 10:03:16",memberId:"4",memberName:"洋洋",coach:"姚伟乙",training:"臀",tempChanged:"否",remark:"按原计划训练"},
+    {date:"2026-07-26 10:03:28",memberId:"17",memberName:"晶晶",coach:"姚伟乙",training:"胸肩",tempChanged:"否",remark:"按原计划训练"},
+    {date:"2026-07-26 12:26:56",memberId:"9",memberName:"小应",coach:"姚伟乙",training:"胸肩",tempChanged:"否",remark:"按原计划训练"},
+    {date:"2026-07-26 12:27:21",memberId:"13",memberName:"何振",coach:"姚伟乙",training:"心肺",tempChanged:"否",remark:"按原计划训练"},
+    {date:"2026-07-26 12:44:27",memberId:"11",memberName:"曹欣怡",coach:"姚伟乙",training:"背",tempChanged:"否",remark:"按原计划训练"},
+    {date:"2026-07-26 13:13:02",memberId:"14",memberName:"吴姐",coach:"姚伟乙",training:"胸肩部",tempChanged:"否",remark:"按原计划训练"},
+    {date:"2026-07-26 14:59:34",memberId:"21",memberName:"小陈",coach:"姚伟乙",training:"胸肩",tempChanged:"否",remark:"按原计划训练"},
+    {date:"2026-07-26 15:37:29",memberId:"5",memberName:"珍珍",coach:"姚伟乙",training:"心肺",tempChanged:"否",remark:"按原计划训练"},
+    {date:"2026-07-26 15:37:33",memberId:"29",memberName:"方",coach:"姚伟乙",training:"心肺",tempChanged:"否",remark:"按原计划训练"},
+    {date:"2026-07-26 16:01:52",memberId:"26",memberName:"啊陈",coach:"姚伟乙",training:"核心",tempChanged:"否",remark:"按原计划训练"},
+    {date:"2026-07-26 16:04:49",memberId:"25",memberName:"王总",coach:"姚伟乙",training:"背部",tempChanged:"否",remark:"按原计划训练"},
+    {date:"2026-07-26 16:05:18",memberId:"23",memberName:"石宁",coach:"姚伟乙",training:"胸肩",tempChanged:"否",remark:"按原计划训练"},
+    {date:"2026-07-28 10:46:57",memberId:"16",memberName:"韦姐",coach:"姚伟乙",training:"背",tempChanged:"否",remark:"按原计划训练"},
+    {date:"2026-07-28 11:40:50",memberId:"20",memberName:"小林",coach:"姚伟乙",training:"背",tempChanged:"否",remark:"按原计划训练"},
+    {date:"2026-07-28 11:53:01",memberId:"11",memberName:"曹欣怡",coach:"姚伟乙",training:"臀",tempChanged:"否",remark:"按原计划训练"},
+    {date:"2026-07-28 14:11:35",memberId:"14",memberName:"吴姐",coach:"姚伟乙",training:"心肺",tempChanged:"否",remark:"按原计划训练"},
+    {date:"2026-07-28 14:11:55",memberId:"26",memberName:"啊陈",coach:"姚伟乙",training:"肩",tempChanged:"否",remark:"按原计划训练"},
+    {date:"2026-07-28 14:36:46",memberId:"25",memberName:"王总",coach:"姚伟乙",training:"胸部",tempChanged:"否",remark:"按原计划训练"},
+    {date:"2026-07-28 18:04:30",memberId:"7",memberName:"欣佳",coach:"姚伟乙",training:"背",tempChanged:"否",remark:"按原计划训练"},
+    {date:"2026-07-28 18:43:01",memberId:"2",memberName:"卷卷",coach:"姚伟乙",training:"背",tempChanged:"否",remark:"按原计划训练"},
+    {date:"2026-07-28 20:18:59",memberId:"9",memberName:"小应",coach:"姚伟乙",training:"背",tempChanged:"否",remark:"按原计划训练"},
+    {date:"2026-07-28 20:22:37",memberId:"13",memberName:"何振",coach:"姚伟乙",training:"腿",tempChanged:"否",remark:"按原计划训练"},
+    {date:"2026-07-28 21:20:53",memberId:"28",memberName:"烧鸡",coach:"姚伟乙",training:"胸肩",tempChanged:"否",remark:"按原计划训练"},
+    {date:"2026-07-28 21:21:10",memberId:"21",memberName:"小陈",coach:"姚伟乙",training:"心肺",tempChanged:"否",remark:"按原计划训练"},
+    {date:"2026-07-28 21:21:18",memberId:"19",memberName:"尤",coach:"姚伟乙",training:"核心",tempChanged:"否",remark:"按原计划训练"},
+    {date:"2026-07-28 21:21:27",memberId:"12",memberName:"小胡",coach:"姚伟乙",training:"臀",tempChanged:"否",remark:"按原计划训练"},
+    {date:"2026-07-29 10:53:28",memberId:"24",memberName:"大蓝",coach:"姚伟乙",training:"心肺",tempChanged:"否",remark:"按原计划训练"},
+    {date:"2026-07-29 12:09:58",memberId:"16",memberName:"韦姐",coach:"姚伟乙",training:"胸肩部",tempChanged:"否",remark:"按原计划训练"},
+    {date:"2026-07-29 12:10:07",memberId:"12",memberName:"小胡",coach:"姚伟乙",training:"背",tempChanged:"否",remark:"按原计划训练"},
+    {date:"2026-07-29 12:11:59",memberId:"11",memberName:"曹欣怡",coach:"姚伟乙",training:"胸肩",tempChanged:"否",remark:"按原计划训练"},
+    {date:"2026-07-29 12:12:15",memberId:"3",memberName:"tt",coach:"姚伟乙",training:"手臂腹",tempChanged:"否",remark:"按原计划训练"},
+    {date:"2026-07-29 19:24:10",memberId:"8",memberName:"呱",coach:"姚伟乙",training:"",tempChanged:"是",remark:"原计划：臀；实际训练："},
+    {date:"2026-07-29 20:13:21",memberId:"13",memberName:"何振",coach:"姚伟乙",training:"胸肩",tempChanged:"否",remark:"按原计划训练"},
+    {date:"2026-07-29 20:13:26",memberId:"30",memberName:"wendy",coach:"姚伟乙",training:"背",tempChanged:"否",remark:"按原计划训练"},
+    {date:"2026-07-29 20:13:57",memberId:"26",memberName:"啊陈",coach:"姚伟乙",training:"",tempChanged:"是",remark:"原计划：背；实际训练："},
+    {date:"2026-07-29 20:14:51",memberId:"9",memberName:"小应",coach:"姚伟乙",training:"核心",tempChanged:"是",remark:"原计划：臀；实际训练："},
+    {date:"2026-07-29 11:32:24",memberId:"7",memberName:"欣佳",coach:"姚伟乙",training:"臀",tempChanged:"否",remark:"按原计划训练"},
+    {date:"2026-07-29 11:32:40",memberId:"23",memberName:"石宁",coach:"姚伟乙",training:"背",tempChanged:"否",remark:"按原计划训练"},
+    {date:"2026-07-29 11:32:48",memberId:"21",memberName:"小陈",coach:"姚伟乙",training:"背",tempChanged:"否",remark:"按原计划训练"},
+    {date:"2026-07-30 11:33:16",memberId:"20",memberName:"小林",coach:"姚伟乙",training:"腿",tempChanged:"否",remark:"按原计划训练"},
+    {date:"2026-07-30 11:59:34",memberId:"28",memberName:"烧鸡",coach:"姚伟乙",training:"核心",tempChanged:"否",remark:"按原计划训练"},
+    {date:"2026-07-30 12:13:52",memberId:"11",memberName:"曹欣怡",coach:"姚伟乙",training:"背",tempChanged:"否",remark:"按原计划训练"},
+    {date:"2026-07-30 13:22:40",memberId:"16",memberName:"韦姐",coach:"姚伟乙",training:"心肺",tempChanged:"否",remark:"按原计划训练"},
+    {date:"2026-07-30 13:49:38",memberId:"25",memberName:"王总",coach:"姚伟乙",training:"背",tempChanged:"否",remark:"按原计划训练"},
+    {date:"2026-07-30 14:10:13",memberId:"14",memberName:"吴姐",coach:"姚伟乙",training:"臀",tempChanged:"否",remark:"按原计划训练"},
+    {date:"2026-07-30 17:03:42",memberId:"30",memberName:"wendy",coach:"姚伟乙",training:"",tempChanged:"是",remark:"原计划：臀；实际训练："},
+    {date:"2026-07-30 18:08:55",memberId:"7",memberName:"欣佳",coach:"姚伟乙",training:"胸肩",tempChanged:"否",remark:"按原计划训练"},
+    {date:"2026-07-30 18:08:58",memberId:"6",memberName:"小刘",coach:"姚伟乙",training:"胸肩",tempChanged:"是",remark:"原计划：臀；实际训练："},
+    {date:"2026-07-30 18:09:32",memberId:"1",memberName:"婷",coach:"姚伟乙",training:"核心",tempChanged:"是",remark:"原计划：臀；实际训练："},
+    {date:"2026-07-30 20:13:37",memberId:"2",memberName:"卷卷",coach:"姚伟乙",training:"胸肩",tempChanged:"是",remark:"原计划：臀；实际训练："},
+    {date:"2026-07-31 11:54:44",memberId:"20",memberName:"小林",coach:"姚伟乙",training:"胸肩",tempChanged:"否",remark:"按原计划训练"},
+    {date:"2026-07-31 11:54:56",memberId:"24",memberName:"大蓝",coach:"姚伟乙",training:"胸肩",tempChanged:"是",remark:"原计划：背；实际训练："},
+    {date:"2026-07-31 11:55:33",memberId:"16",memberName:"韦姐",coach:"姚伟乙",training:"臀",tempChanged:"否",remark:"按原计划训练"},
+    {date:"2026-07-31 11:56:47",memberId:"28",memberName:"烧鸡",coach:"姚伟乙",training:"臀",tempChanged:"否",remark:"按原计划训练"},
+    {date:"2026-07-31 14:14:24",memberId:"25",memberName:"王总",coach:"姚伟乙",training:"胸部",tempChanged:"否",remark:"按原计划训练"},
+    {date:"2026-07-31 14:32:22",memberId:"26",memberName:"啊陈",coach:"姚伟乙",training:"背",tempChanged:"否",remark:"按原计划训练"},
+    {date:"2026-07-31 17:35:13",memberId:"23",memberName:"石宁",coach:"姚伟乙",training:"核心",tempChanged:"否",remark:"按原计划训练"},
+    {date:"2026-07-31 18:14:32",memberId:"12",memberName:"小胡",coach:"姚伟乙",training:"臀",tempChanged:"否",remark:"按原计划训练"},
+    {date:"2026-07-31 19:16:53",memberId:"21",memberName:"小陈",coach:"姚伟乙",training:"心肺2",tempChanged:"否",remark:"按原计划训练"},
+    {date:"2026-07-31 19:17:13",memberId:"1",memberName:"婷",coach:"姚伟乙",training:"臀",tempChanged:"否",remark:"按原计划训练"},
+    {date:"2026-07-31 19:17:26",memberId:"6",memberName:"小刘",coach:"姚伟乙",training:"背",tempChanged:"是",remark:"原计划：臀；实际训练："},
+    {date:"2026-07-31 19:18:02",memberId:"30",memberName:"wendy",coach:"姚伟乙",training:"胸肩",tempChanged:"否",remark:"按原计划训练"},
+    {date:"2026-07-31 19:55:33",memberId:"9",memberName:"小应",coach:"姚伟乙",training:"臀",tempChanged:"否",remark:"按原计划训练"},
+    {date:"2026-07-31 19:56:11",memberId:"13",memberName:"何振",coach:"姚伟乙",training:"心肺1",tempChanged:"否",remark:"按原计划训练"},
+    {date:"2026-08-01 13:09:38",memberId:"4",memberName:"洋洋",coach:"姚伟乙",training:"胸肩",tempChanged:"否",remark:"按原计划训练"},
+    {date:"2026-08-01 14:05:02",memberId:"2",memberName:"卷卷",coach:"姚伟乙",training:"臀",tempChanged:"否",remark:"按原计划训练"},
+    {date:"2026-08-01 19:45:05",memberId:"6",memberName:"小刘",coach:"姚伟乙",training:"臀",tempChanged:"否",remark:"按原计划训练"},
+    {date:"2026-08-02 11:00:00",memberId:"4",memberName:"洋洋",coach:"姚伟乙",training:"背",tempChanged:"否",remark:"按原计划训练"},
+    {date:"2026-08-02 14:09:37",memberId:"17",memberName:"晶晶",coach:"姚伟乙",training:"胸肩",tempChanged:"是",remark:"原计划：心肺；实际训练：胸肩"},
+    {date:"2026-08-02 14:09:51",memberId:"26",memberName:"啊陈",coach:"姚伟乙",training:"腿",tempChanged:"否",remark:"按原计划训练"},
+    {date:"2026-08-02 17:17:05",memberId:"11",memberName:"曹欣怡",coach:"姚伟乙",training:"背",tempChanged:"是",remark:"原计划：臀；实际训练：背"},
+    {date:"2026-08-02 17:17:20",memberId:"2",memberName:"卷卷",coach:"姚伟乙",training:"胸肩",tempChanged:"否",remark:"按原计划训练"},
+    {date:"2026-08-02 17:50:01",memberId:"6",memberName:"小刘",coach:"姚伟乙",training:"胸肩",tempChanged:"否",remark:"按原计划训练"},
+    {date:"2026-08-02 19:04:50",memberId:"21",memberName:"小陈",coach:"姚伟乙",training:"腿",tempChanged:"否",remark:"按原计划训练"},
+    {date:"2026-08-03 11:12:44",memberId:"3",memberName:"tt",coach:"姚伟乙",training:"背",tempChanged:"是",remark:"原计划：胸肩；实际训练：臀"},
+    {date:"2026-08-03 11:12:54",memberId:"4",memberName:"洋洋",coach:"姚伟乙",training:"臀",tempChanged:"否",remark:"按原计划训练"},
+    {date:"2026-08-03 11:57:51",memberId:"28",memberName:"烧鸡",coach:"姚伟乙",training:"胸肩",tempChanged:"否",remark:"按原计划训练"},
+    {date:"2026-08-03 13:39:31",memberId:"27",memberName:"小张",coach:"姚伟乙",training:"胸肩",tempChanged:"是",remark:"原计划：心肺2；实际训练：胸肩"},
+    {date:"2026-08-03 13:39:51",memberId:"25",memberName:"王总",coach:"姚伟乙",training:"背",tempChanged:"否",remark:"按原计划训练"},
+    {date:"2026-08-03 17:14:57",memberId:"10",memberName:"小宋",coach:"姚伟乙",training:"心肺",tempChanged:"是",remark:"原计划：.；实际训练：心肺"},
+    {date:"2026-08-03 17:15:20",memberId:"26",memberName:"啊陈",coach:"姚伟乙",training:"肩",tempChanged:"是",remark:"原计划：核心；实际训练：肩"},
+    {date:"2026-08-03 17:36:27",memberId:"23",memberName:"石宁",coach:"姚伟乙",training:"臀",tempChanged:"否",remark:"按原计划训练"},
+    {date:"2026-08-03 20:14:52",memberId:"9",memberName:"小应",coach:"姚伟乙",training:"胸肩",tempChanged:"否",remark:"按原计划训练"},
+    {date:"2026-08-03 20:15:05",memberId:"13",memberName:"何振",coach:"姚伟乙",training:"背",tempChanged:"否",remark:"按原计划训练"},
+    {date:"2026-08-03 21:13:22",memberId:"30",memberName:"wendy",coach:"姚伟乙",training:"心肺",tempChanged:"是",remark:"原计划：背；实际训练：心肺"},
+    {date:"2026-08-03 21:13:42",memberId:"7",memberName:"欣佳",coach:"姚伟乙",training:"背",tempChanged:"否",remark:"按原计划训练"},
+    {date:"2026-08-03 21:14:33",memberId:"6",memberName:"小刘",coach:"姚伟乙",training:"背",tempChanged:"否",remark:"按原计划训练"},
+  ],
+  params: [
+    {type:"训练内容",current:"胸肩",next:"心肺",keywords:"胸肩，心肺，背，心肺，腿",enabled:"是",order:"1",color:"浅橙"},
+    {type:"训练内容",current:"背",next:"臀",keywords:"背部,背调整,背核心,背部训练",enabled:"是",order:"2",color:"浅蓝"},
+    {type:"训练内容",current:"臀",next:"核心",keywords:"腿,下肢,下肢调整,下肢功能性",enabled:"是",order:"3",color:"浅绿"},
+    {type:"训练内容",current:"核心",next:"心肺",keywords:"核心功能性,功能性核心,功能性训练,功能调整,组合型训练,手臂腹,对位训练",enabled:"是",order:"4",color:"浅黄"},
+    {type:"训练内容",current:"心肺",next:"胸肩",keywords:"有氧,呼吸,心肺与核心,核心与心肺,背心肺,上肢心肺,心肺1,心肺2",enabled:"是",order:"5",color:"浅紫"},
+  ],
+};
+
+// State
+let state = { members: [], records: [], params: [] };
+let currentCoachFilter = '';
+
+// ===================== 云同步（腾讯云开发 CloudBase） =====================
+const CLOUD_SDK_URLS = [
+  'https://static.cloudbase.net/cloudbase-js-sdk/2.17.3/cloudbase.full.js',
+  'https://static.cloudbase.net/cloudbase-js-sdk/latest/cloudbase.full.js'
+];
+const CLOUD_COLLECTION = 'gym_data';
+const CLOUD_DOC = 'main';
+let cloudApp = null, cloudDb = null, cloudBusy = false, cloudTimer = null, cloudUploadTimer = null;
+
+function getCloudCfg() {
+  try { return JSON.parse(localStorage.getItem(STORAGE_KEY + '_cloud') || '{}'); } catch (e) { return {}; }
+}
+function setCloudCfg(patch) {
+  const cfg = Object.assign(getCloudCfg(), patch);
+  localStorage.setItem(STORAGE_KEY + '_cloud', JSON.stringify(cfg));
+  return cfg;
+}
+function getDeviceName() {
+  let d = localStorage.getItem(STORAGE_KEY + '_device');
+  if (!d) {
+    d = '设备-' + Math.random().toString(36).slice(2, 6).toUpperCase();
+    localStorage.setItem(STORAGE_KEY + '_device', d);
+  }
+  return d;
+}
+
+function loadScript(src) {
+  return new Promise((resolve, reject) => {
+    const s = document.createElement('script');
+    s.src = src;
+    s.async = true;
+    s.onload = () => resolve();
+    s.onerror = () => reject(new Error('无法加载 ' + src));
+    document.head.appendChild(s);
+  });
+}
+
+// 连接云开发（懒加载 SDK + 匿名登录）
+async function cloudInit(showToast) {
+  const input = document.getElementById('cloudEnvId');
+  const env = ((input && input.value) || getCloudCfg().env || '').trim();
+  if (!env) {
+    if (showToast !== false) toast('请先填写云开发环境ID', 'warning');
+    return null;
+  }
+  setCloudCfg({ env });
+  try {
+    if (!cloudApp) {
+      if (typeof window.cloudbase === 'undefined') {
+        let ok = false;
+        for (const url of CLOUD_SDK_URLS) {
+          try { await loadScript(url); ok = true; break; } catch (e) { /* 换下一个地址 */ }
+        }
+        if (!ok) throw new Error('云组件加载失败，请检查网络');
+      }
+      cloudApp = window.cloudbase.init({ env });
+      const auth = cloudApp.auth({ persistence: 'local' });
+      const loginState = await auth.getLoginState();
+      if (!loginState) await auth.signInAnonymously();
+      cloudDb = cloudApp.database();
+    }
+    if (showToast) toast('云开发连接成功，可以开始同步了', 'success');
+    setCloudCfg({ connected: true });
+    updateCloudInfo();
+    return cloudApp;
+  } catch (err) {
+    setCloudCfg({ connected: false });
+    updateCloudInfo();
+    toast('连接失败：' + (err.message || err) + '（请确认已开启匿名登录、且当前网址已加入安全域名）', 'error');
+    return null;
+  }
+}
+
+async function cloudConnect() {
+  await cloudInit(true);
+}
+
+// 上传：把本机数据整份写到云端
+async function cloudUpload(silent) {
+  if (cloudBusy) return false;
+  try {
+    const app = await cloudInit(false);
+    if (!app) return false;
+    cloudBusy = true;
+    const now = new Date().toISOString();
+    await cloudDb.collection(CLOUD_COLLECTION).doc(CLOUD_DOC).set({
+      payload: {
+        systemName: state.systemName,
+        members: state.members,
+        records: state.records,
+        params: state.params
+      },
+      updatedAt: now,
+      device: getDeviceName()
+    });
+    setCloudCfg({ lastSync: now, lastUpload: now });
+    if (!silent) toast('已上传到云端，其他设备拉取即可看到', 'success');
+    updateCloudInfo();
+    return true;
+  } catch (err) {
+    toast('上传失败：' + (err.message || err), 'error');
+    return false;
+  } finally {
+    cloudBusy = false;
+  }
+}
+
+// 拉取：云端数据与本机合并（不会互相覆盖）
+async function cloudPull(silent) {
+  if (cloudBusy) return false;
+  try {
+    const app = await cloudInit(false);
+    if (!app) return false;
+    cloudBusy = true;
+    const res = await cloudDb.collection(CLOUD_COLLECTION).doc(CLOUD_DOC).get();
+    const doc = res && res.data && res.data[0];
+    if (!doc || !doc.payload) {
+      if (!silent) toast('云端还没有数据，请先在本机点「上传到云端」', 'warning');
+      return false;
+    }
+    const beforeR = state.records.length, beforeM = state.members.length;
+    const merged = mergeState(state, doc.payload);
+    const addR = merged.records.length - beforeR, addM = merged.members.length - beforeM;
+    state = merged;
+    saveData();
+    refreshAllViews();
+    setCloudCfg({ lastSync: new Date().toISOString() });
+    if (!silent) {
+      toast(addR || addM
+        ? `已从云端合并：新增 ${Math.max(addR, 0)} 条记录、${Math.max(addM, 0)} 位会员`
+        : '云端数据与本机一致，无需合并', 'success');
+    } else if (addR || addM) {
+      toast(`云端有更新，已自动合并 ${Math.max(addR, 0)} 条记录`, 'info');
+    }
+    updateCloudInfo();
+    return true;
+  } catch (err) {
+    toast('拉取失败：' + (err.message || err), 'error');
+    return false;
+  } finally {
+    cloudBusy = false;
+  }
+}
+
+// ---------- GitHub Gist 通道（永久免费、不收费、不到期） ----------
+const GIST_API = 'https://api.github.com/gists';
+const GIST_FILE = 'gym-workspace-data.json';
+
+function gistTokenValue() {
+  const el = document.getElementById('gistToken');
+  return ((el && el.value) || getCloudCfg().gistToken || '').trim();
+}
+function gistIdValue() {
+  const el = document.getElementById('gistId');
+  return ((el && el.value) || getCloudCfg().gistId || '').trim();
+}
+function gistAuthHeaders() {
+  return {
+    'Authorization': 'Bearer ' + gistTokenValue(),
+    'Accept': 'application/vnd.github+json',
+    'Content-Type': 'application/json'
+  };
+}
+function cloudPayloadText() {
+  return JSON.stringify({
+    systemName: state.systemName,
+    members: state.members,
+    records: state.records,
+    params: state.params
+  });
+}
+
+// 创建一份云端存档（每台设备之后填同一个存档ID即可共享）
+async function gistCreate() {
+  const token = gistTokenValue();
+  if (!token) { toast('请先粘贴 GitHub Token', 'warning'); return; }
+  try {
+    const res = await fetch(GIST_API, {
+      method: 'POST',
+      headers: gistAuthHeaders(),
+      body: JSON.stringify({
+        description: '健身会员工作台数据存档',
+        public: false,
+        files: { [GIST_FILE]: { content: cloudPayloadText() } }
+      })
+    });
+    if (!res.ok) throw new Error('HTTP ' + res.status + ' ' + (await res.text()).slice(0, 120));
+    const data = await res.json();
+    setCloudCfg({ channel: 'gist', gistToken: token, gistId: data.id, connected: true });
+    updateCloudInfo();
+    toast('云端存档已创建！把存档ID抄给其他设备就能共享数据', 'success');
+  } catch (err) {
+    toast('创建失败：' + (err.message || err) + '（Token 是否有效、是否勾选了 Gists 权限？）', 'error');
+  }
+}
+
+async function gistUpload(silent) {
+  const token = gistTokenValue(), id = gistIdValue();
+  if (!token || !id) {
+    if (!silent) toast('请先填 Token 和存档ID，或点「创建云端存档」', 'warning');
+    return false;
+  }
+  try {
+    const res = await fetch(GIST_API + '/' + id, {
+      method: 'PATCH',
+      headers: gistAuthHeaders(),
+      body: JSON.stringify({ files: { [GIST_FILE]: { content: cloudPayloadText() } } })
+    });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const now = new Date().toISOString();
+    setCloudCfg({ channel: 'gist', gistToken: token, gistId: id, lastSync: now, lastUpload: now, connected: true });
+    if (!silent) toast('已上传到云端，其他设备拉取即可看到', 'success');
+    updateCloudInfo();
+    return true;
+  } catch (err) {
+    toast('上传失败：' + (err.message || err), 'error');
+    return false;
+  }
+}
+
+async function gistPull(silent) {
+  const token = gistTokenValue(), id = gistIdValue();
+  if (!token || !id) {
+    if (!silent) toast('请先填 Token 和存档ID', 'warning');
+    return false;
+  }
+  try {
+    const res = await fetch(GIST_API + '/' + id, { headers: gistAuthHeaders() });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const data = await res.json();
+    const file = data.files && data.files[GIST_FILE];
+    if (!file) throw new Error('存档里没有找到数据文件');
+    let content = file.content;
+    if ((!content || file.truncated) && file.raw_url) {
+      const r2 = await fetch(file.raw_url);
+      content = await r2.text();
+    }
+    const payload = JSON.parse(content);
+    const beforeR = state.records.length, beforeM = state.members.length;
+    const merged = mergeState(state, payload);
+    const addR = merged.records.length - beforeR, addM = merged.members.length - beforeM;
+    state = merged;
+    saveData();
+    refreshAllViews();
+    setCloudCfg({ channel: 'gist', gistToken: token, gistId: id, lastSync: new Date().toISOString(), connected: true });
+    if (!silent) {
+      toast(addR || addM
+        ? `已从云端合并：新增 ${Math.max(addR, 0)} 条记录、${Math.max(addM, 0)} 位会员`
+        : '云端数据与本机一致，无需合并', 'success');
+    } else if (addR || addM) {
+      toast(`云端有更新，已自动合并 ${Math.max(addR, 0)} 条记录`, 'info');
+    }
+    updateCloudInfo();
+    return true;
+  } catch (err) {
+    toast('拉取失败：' + (err.message || err), 'error');
+    return false;
+  }
+}
+
+// ---------- 通道统一入口 ----------
+async function syncUpload(silent) {
+  const cfg = getCloudCfg();
+  if (cfg.channel === 'gist') return gistUpload(silent);
+  if (cfg.channel === 'cloudbase') return cloudUpload(silent);
+  if (!silent) toast('请先在「同步通道」里选一种方式', 'warning');
+  return false;
+}
+async function syncPull(silent) {
+  const cfg = getCloudCfg();
+  if (cfg.channel === 'gist') return gistPull(silent);
+  if (cfg.channel === 'cloudbase') return cloudPull(silent);
+  if (!silent) toast('请先在「同步通道」里选一种方式', 'warning');
+  return false;
+}
+async function syncTest() {
+  const cfg = getCloudCfg();
+  if (cfg.channel === 'gist') {
+    const ok = await gistPull(false);
+    if (ok) toast('GitHub 存档连接正常', 'success');
+    return;
+  }
+  if (cfg.channel === 'cloudbase') return cloudConnect();
+  toast('请先在「同步通道」里选一种方式', 'warning');
+}
+function switchCloudChannel() {
+  const ch = document.getElementById('cloudChannel')?.value || '';
+  setCloudCfg({ channel: ch });
+  updateCloudInfo();
+}
+
+// 自动同步开关
+function toggleCloudAuto() {
+  const cb = document.getElementById('cloudAuto');
+  const on = cb ? cb.checked : false;
+  setCloudCfg({ auto: on });
+  if (cloudTimer) { clearInterval(cloudTimer); cloudTimer = null; }
+  if (on) {
+    // 页面在后台时不轮询，省流量也省云资源
+    cloudTimer = setInterval(() => {
+      const cfg = getCloudCfg();
+      if (cfg.channel && document.visibilityState === 'visible') syncPull(true);
+    }, 60000);
+    syncPull(true);
+  }
+  updateCloudInfo();
+  toast(on ? '自动同步已开启（保存后自动上传，每分钟自动拉取）' : '自动同步已关闭', 'info');
+}
+
+// 保存后延迟自动上传（2 秒防抖）
+function scheduleCloudUpload() {
+  const cfg = getCloudCfg();
+  if (!cfg.auto || !cfg.channel || cloudBusy) return;
+  if (cloudUploadTimer) clearTimeout(cloudUploadTimer);
+  cloudUploadTimer = setTimeout(() => syncUpload(true), 2000);
+}
+
+function updateCloudInfo() {
+  const cfg = getCloudCfg();
+  const infoEl = document.getElementById('cloudInfo');
+  if (infoEl) {
+    const last = cfg.lastSync ? new Date(cfg.lastSync).toLocaleString('zh-CN') : '尚未同步过';
+    const chName = cfg.channel === 'gist' ? 'GitHub 存档（永久免费）' : cfg.channel === 'cloudbase' ? '腾讯云开发' : '未开启';
+    const chDetail = cfg.channel === 'gist'
+      ? `存档ID：<b>${cfg.gistId || '未创建'}</b>`
+      : cfg.channel === 'cloudbase' ? `环境ID：<b>${cfg.env || '未填写'}</b>` : '';
+    infoEl.innerHTML = `当前通道：<b>${chName}</b> ${chDetail ? '｜ ' + chDetail : ''} ｜ 本设备：<b>${getDeviceName()}</b><br>`
+      + `最后同步：${last} ｜ 自动同步：<b style="color:${cfg.auto ? 'var(--c-success)' : 'var(--c-text-light)'};">${cfg.auto ? '已开启' : '已关闭'}</b><br>`
+      + `<span style="color:var(--c-text-light);">同步规则：两边数据按「会员编号 + 训练时间」合并去重，不会互相覆盖。首次启用请先由数据最全的那台设备上传。</span>`;
+  }
+  const chip = document.getElementById('cloudStatus');
+  if (chip) {
+    const txt = chip.querySelector('.txt');
+    if (!cfg.env) { chip.className = 'cloud-status'; txt.textContent = '云同步未开启'; }
+    else if (!cfg.connected) { chip.className = 'cloud-status err'; txt.textContent = '云端未连接'; }
+    else {
+      chip.className = 'cloud-status on';
+      txt.textContent = '☁ 已同步 ' + (cfg.lastSync ? new Date(cfg.lastSync).toTimeString().slice(0, 5) : '');
+    }
+  }
+  // 面板显隐 + 回填
+  const chSel = document.getElementById('cloudChannel');
+  if (chSel) chSel.value = cfg.channel || '';
+  const gistPane = document.getElementById('gistCfg');
+  const cbPane = document.getElementById('cloudbaseCfg');
+  if (gistPane) gistPane.style.display = cfg.channel === 'gist' ? 'block' : 'none';
+  if (cbPane) cbPane.style.display = cfg.channel === 'cloudbase' ? 'block' : 'none';
+  const gToken = document.getElementById('gistToken');
+  if (gToken && cfg.gistToken && !gToken.value) gToken.value = cfg.gistToken;
+  const gId = document.getElementById('gistId');
+  if (gId && cfg.gistId && !gId.value) gId.value = cfg.gistId;
+  const input = document.getElementById('cloudEnvId');
+  if (input && cfg.env && !input.value) input.value = cfg.env;
+  const cb = document.getElementById('cloudAuto');
+  if (cb) cb.checked = !!cfg.auto;
+}
+
+function initCloudUI() {
+  updateCloudInfo();
+  const cfg = getCloudCfg();
+  if (cfg.auto && cfg.channel) {
+    cloudTimer = setInterval(() => {
+      if (document.visibilityState === 'visible') syncPull(true);
+    }, 60000);
+    setTimeout(() => syncPull(true), 3000);
+  }
+}
+
+// ===================== INIT =====================
+// 校验存档结构，防止读取到空/损坏数据
+function normalizeState(raw) {
+  const data = JSON.parse(raw);
+  if (!data || !Array.isArray(data.members) || !Array.isArray(data.records)) {
+    throw new Error('存档结构不完整');
+  }
+  return data;
+}
+
+function init() {
+  const saved = localStorage.getItem(STORAGE_KEY);
+  const backup = localStorage.getItem(STORAGE_KEY + '_bak');
+  let loaded = null;
+
+  if (saved) {
+    try { loaded = normalizeState(saved); } catch (e) { loaded = null; }
+  }
+  // 主存档是空壳（会员被清空）但快照里有数据 → 判定为异常覆盖，回滚
+  if (loaded && (!loaded.members || loaded.members.length === 0) && backup) {
+    try {
+      const b = normalizeState(backup);
+      if (b.members && b.members.length > 0) {
+        loaded = b;
+        setTimeout(() => toast('检测到会员数据被清空，已自动回滚到上一版存档', 'warning'), 600);
+      }
+    } catch (e) { /* 快照也坏了就算了 */ }
+  }
+  // 主存档丢失/损坏 → 自动回滚到上一版快照
+  if (!loaded && backup) {
+    try {
+      loaded = normalizeState(backup);
+      setTimeout(() => toast('主数据异常，已自动恢复上一版存档', 'warning'), 600);
+    } catch (e) { loaded = null; }
+  }
+
+  if (loaded) {
+    state = loaded;
+    // Migration: clean up old params if they have garbage rows (>5)
+    if (state.params && state.params.length > 5) {
+      state.params = JSON.parse(JSON.stringify(INITIAL_DATA.params));
+    }
+    // Ensure members don't break if trainingNote is missing
+    state.members = state.members.map(m => ({
+      ...m,
+      trainingNote: m.trainingNote || ''
+    }));
+    // Ensure systemName exists
+    if (!state.systemName) state.systemName = '大姚健身管理系统';
+  } else {
+    state = JSON.parse(JSON.stringify(INITIAL_DATA));
+    saveData();
+  }
+  // Apply system name
+  const nameEl = document.getElementById('systemNameDisplay');
+  if (nameEl && state.systemName) nameEl.textContent = state.systemName;
+  if (state.systemName) document.title = state.systemName + ' - 工作台';
+  updateSaveStatus('ok');
+  setupAutoSaveHooks();
+  initCloudUI();
+  // 首页时钟：每秒刷新
+  updateHeroClock();
+  setInterval(updateHeroClock, 1000);
+  initCoachFilter();
+  renderDashboard();
+}
+
+// 保存：先留上一版快照，再写主数据；写入失败要明确提示，不能静默丢数据
+function saveData() {
+  try {
+    const str = JSON.stringify(state);
+    const prev = localStorage.getItem(STORAGE_KEY);
+    if (prev && prev !== str) {
+      try { localStorage.setItem(STORAGE_KEY + '_bak', prev); } catch (e) { /* 快照失败不影响主保存 */ }
+    }
+    localStorage.setItem(STORAGE_KEY, str);
+    const now = new Date();
+    const pad = n => String(n).padStart(2, '0');
+    localStorage.setItem(STORAGE_KEY + '_savetime',
+      `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`);
+    updateSaveStatus('ok');
+    // 开了云同步就顺手上传一次（2 秒防抖，避免连续操作频繁上传）
+    if (typeof scheduleCloudUpload === 'function') scheduleCloudUpload();
+    return true;
+  } catch (err) {
+    const quota = err && (err.name === 'QuotaExceededError' || err.code === 22);
+    updateSaveStatus('err');
+    toast(quota ? '保存失败：浏览器存储空间已满，请到参数页导出备份' : '保存失败：' + (err.message || '浏览器拒绝写入本地存储'), 'error');
+    console.error('saveData failed:', err);
+    return false;
+  }
+}
+
+// 顶部保存状态指示
+function updateSaveStatus(kind, text) {
+  const el = document.getElementById('saveStatus');
+  if (!el) return;
+  el.className = 'save-status' + (kind === 'ok' ? '' : kind === 'err' ? ' err' : ' warn');
+  const txtEl = el.querySelector('.txt');
+  if (text) { txtEl.textContent = text; return; }
+  const t = localStorage.getItem(STORAGE_KEY + '_savetime') || '';
+  if (kind === 'ok') txtEl.textContent = t ? '已保存 ' + t.slice(11) : '已保存';
+  else if (kind === 'err') txtEl.textContent = '保存失败！请立即导出备份';
+  else txtEl.textContent = '有改动待保存';
+}
+
+// 兜底保存 + 多窗口同步，避免"刷新后数据没了"
+function setupAutoSaveHooks() {
+  // 切到后台 / 关闭页面 / 刷新前，强制落盘一次
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'hidden') saveData();
+  });
+  window.addEventListener('pagehide', saveData);
+  window.addEventListener('beforeunload', saveData);
+
+  // 另一个标签页写入后，本页自动跟随最新数据
+  // （否则旧窗口基于内存里的旧数据一操作，就会把新数据覆盖掉）
+  window.addEventListener('storage', e => {
+    if (e.key !== STORAGE_KEY || !e.newValue) return;
+    try {
+      const incoming = normalizeState(e.newValue);
+      state = incoming;
+      if (typeof refreshAllViews === 'function') refreshAllViews();
+      toast('已同步其他窗口的最新数据', 'info');
+    } catch (err) { /* 忽略无效数据 */ }
+  });
+}
+
+function escapeHtml(text) {
+  if (!text) return '';
+  const div = document.createElement('div');
+  div.textContent = text;
+  return div.innerHTML;
+}
+
+// ===================== 数据备份与恢复 =====================
+function getDateStamp() {
+  const d = new Date();
+  return `${d.getFullYear()}${String(d.getMonth() + 1).padStart(2, '0')}${String(d.getDate()).padStart(2, '0')}`;
+}
+
+function downloadBlob(blob, filename) {
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(() => URL.revokeObjectURL(url), 1500);
+}
+
+function exportJSON() {
+  try {
+    const dataStr = JSON.stringify(state, null, 2);
+    const blob = new Blob([dataStr], { type: 'application/json;charset=utf-8;' });
+    downloadBlob(blob, `${state.systemName || '健身工作台'}_备份_${getDateStamp()}.json`);
+    const now = new Date();
+    localStorage.setItem(STORAGE_KEY + '_lastBackup',
+      `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')} ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`);
+    updateBackupInfo();
+    toast('备份已导出，请妥善保存文件', 'success');
+  } catch (err) {
+    toast('导出失败：' + (err.message || '未知错误'), 'error');
+  }
+}
+
+// 合并两份数据：会员按编号去重（取训练日期更新的那条），记录按「会员+时间」去重
+function mergeState(base, incoming) {
+  const memberMap = new Map();
+  (base.members || []).forEach(m => memberMap.set(String(m.id), { ...m }));
+  (incoming.members || []).forEach(m => {
+    const key = String(m.id);
+    const cur = memberMap.get(key);
+    if (!cur) { memberMap.set(key, { ...m }); return; }
+    const newer = String(m.lastDate || '') > String(cur.lastDate || '');
+    memberMap.set(key, newer ? { ...m } : cur);
+  });
+
+  const seen = new Set();
+  const records = [];
+  [...(base.records || []), ...(incoming.records || [])].forEach(r => {
+    const key = String(r.memberId) + '|' + String(r.date || '');
+    if (seen.has(key)) return;
+    seen.add(key);
+    records.push(r);
+  });
+  records.sort((a, b) => String(a.date || '').localeCompare(String(b.date || '')));
+
+  return {
+    systemName: base.systemName || incoming.systemName,
+    members: [...memberMap.values()],
+    records: records,
+    params: (incoming.params && incoming.params.length) ? incoming.params : (base.params || [])
+  };
+}
+
+// 导入方式二选一：合并 / 覆盖
+let pendingImportData = null;
+
+function askImportMode(data) {
+  const inMembers = data.members.length;
+  const inRecords = Array.isArray(data.records) ? data.records.length : 0;
+  showModal(`
+    <h3>📥 导入备份</h3>
+    <p style="margin:12px 0;line-height:1.9;">
+      备份文件：<b>${inMembers}</b> 位会员 / <b>${inRecords}</b> 条训练记录<br>
+      本设备当前：<b>${state.members.length}</b> 位会员 / <b>${state.records.length}</b> 条训练记录
+    </p>
+    <div class="modal-actions">
+      <button class="btn btn-primary" onclick="doImport('merge')">🔀 合并（推荐）</button>
+      <button class="btn btn-danger" onclick="doImport('overwrite')">♻️ 覆盖</button>
+      <button class="btn btn-default" onclick="closeModal()">取消</button>
+    </div>
+    <p style="font-size:12px;color:#888;margin-top:12px;line-height:1.8;">
+      <b>合并</b>：两边的数据都保留，会员按编号去重（取训练更新的那条），记录按「会员+时间」自动去重。<br>
+      <b>覆盖</b>：只保留备份文件的数据，本设备现有数据会被清空（用于恢复旧备份）。
+    </p>
+  `);
+  pendingImportData = data;
+}
+
+// 导入/覆盖前，先单独存一份「导入前快照」，随时可一键回滚
+function snapshotPreImport() {
+  try {
+    localStorage.setItem(STORAGE_KEY + '_preimport', JSON.stringify(state));
+  } catch (e) { /* 存不下就算了，还有 _bak 兜底 */ }
+}
+
+// 一键恢复到导入前（或上一次保存前）的数据
+function restoreSnapshot() {
+  const pre = localStorage.getItem(STORAGE_KEY + '_preimport');
+  const bak = localStorage.getItem(STORAGE_KEY + '_bak');
+  const raw = pre || bak;
+  if (!raw) { toast('这台设备上没有找到可恢复的快照', 'warning'); return; }
+  let data;
+  try { data = normalizeState(raw); } catch (e) { toast('快照损坏，无法恢复', 'error'); return; }
+  const src = pre ? '导入前' : '上一次保存前';
+  if (!confirm(`恢复到「${src}」的数据：\n${data.members.length} 位会员、${data.records.length} 条训练记录。\n\n当前数据会被替换（当前状态也会存成新快照，可再切回来），确定吗？`)) return;
+  state = data;
+  saveData();
+  refreshAllViews();
+  toast(`已恢复到${src}的数据`, 'success');
+}
+
+function doImport(mode) {
+  const data = pendingImportData;
+  if (!data) { closeModal(); return; }
+  if (mode === 'overwrite' && !confirm('确定要覆盖吗？本设备现有数据会被备份文件完全替换，且无法撤销。')) {
+    return;
+  }
+  snapshotPreImport();
+  if (mode === 'merge') {
+    state = mergeState(state, data);
+    saveData();
+    refreshAllViews();
+    toast(`已合并：现在共 ${state.members.length} 位会员、${state.records.length} 条记录`, 'success');
+  } else {
+    state = {
+      systemName: data.systemName || state.systemName,
+      members: data.members,
+      records: Array.isArray(data.records) ? data.records : [],
+      params: Array.isArray(data.params) && data.params.length ? data.params : state.params
+    };
+    saveData();
+    refreshAllViews();
+    toast(`已覆盖恢复 ${state.members.length} 位会员、${state.records.length} 条记录`, 'success');
+  }
+  pendingImportData = null;
+  closeModal();
+}
+
+function importJSON(input) {
+  const file = input.files && input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const data = JSON.parse(e.target.result);
+      if (!data || !Array.isArray(data.members)) {
+        throw new Error('不是有效的工作台备份文件');
+      }
+      askImportMode(data);
+    } catch (err) {
+      toast('导入失败：' + (err.message || '文件格式错误'), 'error');
+    }
+    input.value = '';
+  };
+  reader.onerror = () => {
+    toast('文件读取失败', 'error');
+    input.value = '';
+  };
+  reader.readAsText(file, 'utf-8');
+}
+
+function exportCSV() {
+  try {
+    const rows = [['日期', '会员编号', '会员姓名', '教练', '训练内容', '是否临时更换', '备注']];
+    [...state.records]
+      .sort((a, b) => String(a.date || '').localeCompare(String(b.date || '')))
+      .forEach(r => {
+        rows.push([r.date, r.memberId, r.memberName, r.coach, r.training, r.tempChanged, r.remark]);
+      });
+    const csv = '\uFEFF' + rows.map(row => row.map(cell => {
+      const s = (cell === null || cell === undefined) ? '' : String(cell);
+      return /[",\r\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
+    }).join(',')).join('\r\n');
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    downloadBlob(blob, `训练记录_${getDateStamp()}.csv`);
+    toast(`已导出 ${state.records.length} 条记录，可用 Excel 打开`, 'success');
+  } catch (err) {
+    toast('导出失败：' + (err.message || '未知错误'), 'error');
+  }
+}
+
+function updateBackupInfo() {
+  const el = document.getElementById('backupInfo');
+  if (!el) return;
+  const last = localStorage.getItem(STORAGE_KEY + '_lastBackup');
+  const saveT = localStorage.getItem(STORAGE_KEY + '_savetime');
+  const dates = state.records.map(r => String(r.date || '').slice(0, 10)).filter(Boolean).sort();
+  const range = dates.length ? `${dates[0]} ~ ${dates[dates.length - 1]}` : '暂无记录';
+  el.innerHTML = `当前共有 <b>${state.members.filter(m => m.name).length}</b> 位会员、<b>${state.records.length}</b> 条训练记录，数据范围：<b>${range}</b>。<br>`
+    + `本设备最后保存：${saveT || '—'}${last ? ` ｜ 上次导出备份：${last}` : ' ｜ <b style="color:var(--c-danger);">尚未导出过备份</b>'}`
+    + `<br><span style="color:var(--c-text-light);">提示：数据保存在当前这台设备的浏览器里，其他电脑/手机不会自动同步，需要靠导出 / 导入来合并。</span>`;
+}
+
+function refreshAllViews() {
+  const nameEl = document.getElementById('systemNameDisplay');
+  if (nameEl && state.systemName) nameEl.textContent = state.systemName;
+  if (state.systemName) document.title = state.systemName + ' - 工作台';
+  initCoachFilter();
+  const activePage = document.querySelector('.page.active');
+  if (activePage) navigateTo(activePage.id.replace('page-', ''));
+  updateBackupInfo();
+}
+
+function editSystemName() {
+  const current = state.systemName || '大姚健身管理系统';
+  const newName = prompt('请输入系统名称（显示在左上角）：', current);
+  if (newName !== null && newName.trim() !== '') {
+    state.systemName = newName.trim();
+    saveData();
+    const nameEl = document.getElementById('systemNameDisplay');
+    if (nameEl) nameEl.textContent = state.systemName;
+    document.title = state.systemName + ' - 工作台';
+    toast('系统名称已更新', 'success');
+  }
+}
+
+// ===================== NAVIGATION =====================
+function navigateTo(page) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('page-' + page).classList.add('active');
+  document.querySelector(`.nav-item[data-page="${page}"]`).classList.add('active');
+  switch(page) {
+    case 'dashboard': renderDashboard(); break;
+    case 'members': renderMembers(); break;
+    case 'records': renderRecords(); break;
+    case 'stats': updateStats(false); break;
+    case 'calendar': renderCalendar(); break;
+    case 'params': renderParams(); break;
+    case 'faq': renderFAQ(); break;
+  }
+  applyTableLabels(page);
+  window.scrollTo(0, 0);
+}
+
+// 手机端表格转卡片：把表头文字写进每个单元格的 data-label
+function applyTableLabels(page) {
+  const pageEl = page ? document.getElementById('page-' + page) : document.querySelector('.page.active');
+  if (!pageEl) return;
+  pageEl.querySelectorAll('table').forEach(table => {
+    if (table.classList.contains('calendar-table')) return;
+    const heads = [...table.querySelectorAll('thead th')].map(th => th.textContent.trim());
+    if (!heads.length) return;
+    table.querySelectorAll('tbody tr').forEach(tr => {
+      const cells = tr.querySelectorAll('td');
+      cells.forEach((td, i) => {
+        if (td.colSpan > 1) return;
+        if (!td.dataset.label && heads[i]) td.dataset.label = heads[i];
+      });
+    });
+  });
+}
+
+// 搜索/刷新导致表格重绘时，自动补上 data-label
+if (typeof MutationObserver !== 'undefined') {
+  const labelObserver = new MutationObserver(muts => {
+    let hit = false;
+    muts.forEach(m => { if (m.target.tagName === 'TBODY') hit = true; });
+    if (hit) applyTableLabels();
+  });
+  document.querySelectorAll('tbody').forEach(tb => labelObserver.observe(tb, { childList: true }));
+}
+
+// ===================== UTILITIES =====================
+function toast(msg, type='info') {
+  const t = document.createElement('div');
+  t.className = 'toast ' + type;
+  t.textContent = msg;
+  document.getElementById('toast').appendChild(t);
+  setTimeout(() => { t.remove(); }, 3000);
+}
+
+function getTrainingClass(training) {
+  if (!training) return '';
+  const t = training.trim();
+  if (COLOR_MAP[t]) return COLOR_MAP[t].class;
+  // Fuzzy match
+  if (/胸|肩/.test(t) && !/背/.test(t)) return 'tc-chest';
+  if (/背/.test(t) && !/胸/.test(t)) return 'tc-back';
+  if (/臀|腿|下肢/.test(t)) return 'tc-glute';
+  if (/核心|腹|功能/.test(t)) return 'tc-core';
+  if (/心肺|有氧|呼吸/.test(t)) return 'tc-cardio';
+  return '';
+}
+
+function getTrainingColor(training) {
+  if (!training) return '';
+  const t = training.trim();
+  if (COLOR_MAP[t]) return COLOR_MAP[t].color;
+  if (/胸|肩/.test(t) && !/背/.test(t)) return '#F4B084';
+  if (/背/.test(t) && !/胸/.test(t)) return '#9DC3E6';
+  if (/臀|腿|下肢/.test(t)) return '#A9D08E';
+  if (/核心|腹|功能/.test(t)) return '#FFD966';
+  if (/心肺|有氧|呼吸/.test(t)) return '#CCC0DA';
+  return '';
+}
+
+function formatDateTime(dtStr) {
+  if (!dtStr) return '';
+  try {
+    const d = new Date(dtStr.replace(/-/g,'/'));
+    if (isNaN(d)) return dtStr;
+    const Y = d.getFullYear();
+    const M = String(d.getMonth()+1).padStart(2,'0');
+    const D = String(d.getDate()).padStart(2,'0');
+    const h = String(d.getHours()).padStart(2,'0');
+    const m = String(d.getMinutes()).padStart(2,'0');
+    return `${Y}/${M}/${D} ${h}:${m}`;
+  } catch { return dtStr; }
+}
+
+function getTodayStr() {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+
+function parseDate(dtStr) {
+  if (!dtStr) return null;
+  try {
+    const d = new Date(dtStr.replace(/-/g,'/'));
+    return isNaN(d) ? null : d;
+  } catch { return null; }
+}
+
+function isSameDay(d1, d2) {
+  return d1.getFullYear() === d2.getFullYear() && d1.getMonth() === d2.getMonth() && d1.getDate() === d2.getDate();
+}
+
+function daysBetween(d1, d2) {
+  const diff = Math.abs(d1 - d2);
+  return Math.floor(diff / (1000 * 60 * 60 * 24));
+}
+
+function getWeekStart() {
+  const d = new Date();
+  const day = d.getDay() || 7; // Monday = 1
+  d.setDate(d.getDate() - day + 1);
+  d.setHours(0,0,0,0);
+  return d;
+}
+
+// ===================== TRAINING SEQUENCE LOGIC =====================
+// VBA: GYM_解析训练顺序 - parse sequence text
+function parseSequence(seqText) {
+  if (!seqText) return [];
+  let s = seqText.replace(/，/g, ',').replace(/、/g, ',').replace(/；/g, ',').replace(/;/g, ',')
+    .replace(/\|/g, ',').replace(/\//g, ',').replace(/→/g, ',').replace(/->/g, ',');
+  return s.split(',').map(x => x.trim()).filter(x => x);
+}
+
+// VBA: GYM_训练匹配键 - normalize training name
+function normalizeTraining(value) {
+  if (!value) return '';
+  let s = String(value).trim().toUpperCase();
+  if (['臀','臀部','臀腿','腿','腿部','下肢'].includes(s)) return '臀';
+  if (['心肺','有氧','呼吸','CARDIO'].includes(s)) return '心肺';
+  if (['核心心肺','心肺与核心','核心与心肺'].includes(s)) return '核心心肺';
+  if (s === '胸肩部') return '胸肩';
+  if (['背部','背部训练'].includes(s)) return '背';
+  return String(value).trim();
+}
+
+function trainingMatch(a, b) {
+  return normalizeTraining(a) === normalizeTraining(b);
+}
+
+// VBA: GYM_按训练顺序取下一项 - get next item in sequence
+function getNextInSequence(seqArr, currentTraining) {
+  if (!seqArr || seqArr.length === 0) return '';
+  if (!currentTraining) return seqArr[0];
+  let foundIdx = -1;
+  for (let i = 0; i < seqArr.length; i++) {
+    if (trainingMatch(currentTraining, seqArr[i])) {
+      foundIdx = i;
+      break;
+    }
+  }
+  if (foundIdx === -1) return seqArr[0];
+  return seqArr[(foundIdx + 1) % seqArr.length];
+}
+
+// VBA: GYM_同步单个会员训练状态 - sync single member
+function syncMemberStatus(memberId) {
+  const member = state.members.find(m => m.id === memberId);
+  if (!member) return;
+  const seqArr = parseSequence(member.sequence);
+  if (seqArr.length === 0) return;
+
+  // Find all records for this member, sorted by date
+  const memberRecords = state.records
+    .filter(r => r.memberId === memberId)
+    .sort((a, b) => new Date(a.date.replace(/-/g,'/')) - new Date(b.date.replace(/-/g,'/')));
+
+  if (memberRecords.length === 0) {
+    member.lastTraining = '';
+    member.nextTraining = seqArr[0];
+    member.lastDate = '';
+    return;
+  }
+
+  const lastRec = memberRecords[memberRecords.length - 1];
+  member.lastTraining = lastRec.training;
+  member.lastDate = lastRec.date;
+  member.nextTraining = getNextInSequence(seqArr, lastRec.training);
+}
+
+// VBA: GYM_同步全部会员训练状态
+function syncAllMembers() {
+  state.members.forEach(m => syncMemberStatus(m.id));
+  saveData();
+  renderMembers();
+  toast('全部会员训练状态已同步', 'success');
+}
+
+// ===================== COACH FILTER =====================
+function initCoachFilter() {
+  const coaches = [...new Set(state.members.map(m => m.coach).filter(c => c))];
+  const sel = document.getElementById('coachFilter');
+  sel.innerHTML = '<option value="">全部教练</option>';
+  coaches.forEach(c => {
+    const opt = document.createElement('option');
+    opt.value = c; opt.textContent = c;
+    sel.appendChild(opt);
+  });
+}
+
+function applyCoachFilter() {
+  currentCoachFilter = document.getElementById('coachFilter').value;
+  renderDashboard();
+}
+
+// ===================== 首页问候横幅 =====================
+const HERO_QUOTES = [
+  '今天又是自律的一天，先从教练的状态开始 💪',
+  '每一滴汗水都不会白流，今天也一样',
+  '会员的进步，藏在每一次准时到场里',
+  '你坚持的样子，就是会员最好的榜样',
+  '带人先带心，一句鼓励抵得过十组训练',
+  '自律是给身体最好的投资，今天继续',
+  '把今天的训练做成作品，而不是任务',
+  '稳住节奏，动作质量永远排在重量前面',
+  '会员想放弃的时候，最需要的是你那一句话',
+  '今天多问一句「感觉怎么样」，比多练两组更值',
+  '好教练不是把人练趴下，而是让人明天还想来',
+  '每一次签到，都是会员对自己许下的承诺',
+  '记录要跟上，别让努力没有留下痕迹',
+  '热身认真一点，收尾细致一点，伤病就少一点',
+  '八块腹肌是厨房里练出来的，别忘提醒饮食',
+  '今天的目标：让每一位到场的会员都被看见',
+  '你已经比昨天的自己更专业了一点',
+  '再忙也记得喝水、按时吃饭，教练也是人',
+  '状态不好就调整计划，懂得变通才是专业',
+  '把会员的名字叫对，训练就成功了一半'
+];
+let heroQuoteOffset = 0;
+
+function heroDayIndex(d) {
+  const start = new Date(d.getFullYear(), 0, 0);
+  return Math.floor((d - start) / 86400000);
+}
+
+function updateHeroClock() {
+  const d = new Date();
+  const week = ['日', '一', '二', '三', '四', '五', '六'][d.getDay()];
+  const p2 = n => String(n).padStart(2, '0');
+
+  const dateEl = document.getElementById('heroDate');
+  if (dateEl) dateEl.textContent = `今天是 ${d.getFullYear()}年${d.getMonth() + 1}月${d.getDate()}日 星期${week}`;
+
+  const timeEl = document.getElementById('heroTime');
+  if (timeEl) timeEl.innerHTML = `${p2(d.getHours())}:${p2(d.getMinutes())}<span class="sec">:${p2(d.getSeconds())}</span>`;
+
+  const h = d.getHours();
+  const greet = h < 6 ? '凌晨好' : h < 11 ? '早上好' : h < 14 ? '中午好' : h < 18 ? '下午好' : h < 23 ? '晚上好' : '夜深了';
+  const greetEl = document.getElementById('heroGreet');
+  if (greetEl) {
+    const coach = currentCoachFilter ? '，' + currentCoachFilter + '教练' : '';
+    greetEl.textContent = `${greet}${coach}！`;
+  }
+
+  const quoteEl = document.getElementById('heroQuote');
+  if (quoteEl) {
+    const idx = (heroDayIndex(d) + heroQuoteOffset) % HERO_QUOTES.length;
+    quoteEl.textContent = HERO_QUOTES[(idx + HERO_QUOTES.length) % HERO_QUOTES.length];
+  }
+}
+
+function nextHeroQuote() {
+  heroQuoteOffset++;
+  updateHeroClock();
+}
+
+function updateHeroStats() {
+  const el = document.getElementById('heroSub');
+  if (!el) return;
+  const today = getTodayStr();
+  let members = state.members.filter(m => m.name);
+  if (currentCoachFilter) members = members.filter(m => m.coach === currentCoachFilter);
+  const ids = new Set(members.map(m => String(m.id)));
+  const checked = state.records.filter(r => r.date && r.date.startsWith(today) && ids.has(String(r.memberId))).length;
+  el.textContent = `今日已签到 ${checked} 人 · 在册 ${members.length} 人 · 还差 ${Math.max(members.length - checked, 0)} 人`;
+}
+
+// ===================== DASHBOARD (首页) =====================
+function renderDashboard() {
+  const today = getTodayStr();
+  let members = state.members.filter(m => m.name);
+  if (currentCoachFilter) {
+    members = members.filter(m => m.coach === currentCoachFilter);
+  }
+  // 按会员编号升序排列（1、2、3…）
+  members.sort((a, b) => Number(a.id) - Number(b.id));
+
+  // 顶部问候横幅（日期时间 + 今日进度）
+  updateHeroClock();
+  updateHeroStats();
+
+  // Stats
+  const totalMembers = members.length;
+  const checkedToday = members.filter(m => {
+    const rec = state.records.find(r => r.memberId === m.id && r.date && r.date.startsWith(today));
+    return !!rec;
+  }).length;
+  const notChecked = totalMembers - checkedToday;
+
+  document.getElementById('dashStats').innerHTML = `
+    <div class="stat-card"><div class="num">${totalMembers}</div><div class="label">总会员数</div></div>
+    <div class="stat-card success"><div class="num">${checkedToday}</div><div class="label">今日已签到</div></div>
+    <div class="stat-card warning"><div class="num">${notChecked}</div><div class="label">今日未签到</div></div>
+    <div class="stat-card"><div class="num">${state.records.length}</div><div class="label">总训练记录</div></div>
+  `;
+
+  // Member cards
+  const container = document.getElementById('dashboardCards');
+  document.getElementById('memberCount').textContent = `(共${members.length}人)`;
+
+  if (members.length === 0) {
+    container.innerHTML = '<div class="empty-state"><div class="icon">📭</div><p>暂无会员数据</p></div>';
+    return;
+  }
+
+  container.innerHTML = members.map(m => {
+    const todayRecord = state.records.find(r => r.memberId === m.id && r.date && r.date.startsWith(today));
+    const isChecked = !!todayRecord;
+    const todayTraining = isChecked ? todayRecord.training : m.nextTraining;
+    const trainingClass = getTrainingClass(todayTraining);
+    const statusBadge = isChecked
+      ? `<span class="badge badge-green">已签到</span>`
+      : `<span class="badge badge-gray">未签到</span>`;
+
+    return `
+      <div class="member-card ${isChecked ? 'checked' : ''}">
+        <div class="header" style="cursor:pointer;" onclick="showMemberDetail('${m.id}')">
+          <div>
+            <span class="name">${m.name}</span>
+            <span class="id">#${m.id}</span>
+          </div>
+          ${statusBadge}
+        </div>
+        <div class="info">教练：${m.coach || '未指定'}</div>
+        <div class="info">今日训练：<span class="training ${trainingClass}" style="padding:2px 8px;border-radius:3px;">${todayTraining || '未安排'}</span></div>
+        ${isChecked ? `<div class="info">签到时间：${formatDateTime(todayRecord.date)}</div>` : ''}
+        ${m.note ? `<div class="info" style="font-size:12px;color:#999;">备注：${m.note}</div>` : ''}
+        <div class="actions">
+          ${isChecked
+            ? `<button class="btn btn-warning" onclick="undoCheckin('${m.id}')">↩ 撤销签到</button>
+               <button class="btn btn-default" onclick="showModifyTraining('${m.id}')">✏ 修改训练</button>`
+            : `<button class="btn btn-checkin" onclick="startCheckin('${m.id}')">✅ 签到</button>`
+          }
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function refreshDashboard() {
+  // VBA: GYM_刷新首页 - sync all members and re-render
+  state.members.forEach(m => syncMemberStatus(m.id));
+  saveData();
+  initCoachFilter();
+  renderDashboard();
+  toast('首页已刷新，会员状态已同步', 'success');
+}
+
+// ===================== CHECK-IN (签到) =====================
+// VBA: GYM_会员签到
+function startCheckin(memberId) {
+  const member = state.members.find(m => m.id === memberId);
+  if (!member) { toast('未找到会员', 'error'); return; }
+
+  const today = getTodayStr();
+  const existing = state.records.find(r => r.memberId === memberId && r.date && r.date.startsWith(today));
+  if (existing) {
+    toast(`${member.name} 今天已经签到`, 'warning');
+    return;
+  }
+
+  // Sync member status first
+  syncMemberStatus(memberId);
+  const plannedTraining = member.nextTraining || '';
+
+  if (!plannedTraining || plannedTraining === '.') {
+    toast(`请先在会员数据库中为 ${member.name} 设置训练顺序`, 'warning');
+    return;
+  }
+
+  // Show check-in dialog
+  const seqArr = parseSequence(member.sequence);
+  const allTrainings = [...new Set([
+    '胸肩', '背', '臀', '核心', '心肺',
+    ...seqArr,
+    '腿', '肩', '胸部', '肩部', '背部',
+    '心肺1', '心肺2', '手臂腹', '对位训练'
+  ])];
+
+  showModal(`
+    <div class="checkin-dialog">
+      <h3 style="font-size:20px;margin-bottom:14px;">✅ 会员签到</h3>
+      <div class="member-info">
+        <h4>${member.name} <span style="font-size:14px;color:#666;">#${member.id}</span></h4>
+        <div style="font-size:13px;color:#666;margin-top:4px;">教练：${member.coach}</div>
+      </div>
+      <div class="planned-training">
+        <span class="label">计划训练内容：</span>
+        <span style="font-weight:700;font-size:20px;padding:6px 16px;border-radius:6px;${plannedTraining ? `background:${getTrainingColor(plannedTraining)};` : ''}">
+          ${plannedTraining}
+        </span>
+      </div>
+      <div class="training-select">
+        <label>实际训练内容（默认按计划训练）：</label>
+        <select id="trainingSelect" onchange="onTrainingSelectChange()">
+          <option value="${plannedTraining}">✅ 按计划训练：${plannedTraining}</option>
+          ${allTrainings.filter(t => t !== plannedTraining).map(t => `<option value="${t}">${t}</option>`).join('')}
+          <option value="__custom__">✏️ 其他（手动输入）…</option>
+        </select>
+        <div class="custom-input" id="customTrainingWrap">
+          <input type="text" id="customTrainingInput" placeholder="请输入训练内容，如：胸肩+有氧" autocomplete="off">
+        </div>
+      </div>
+      <div class="actions">
+        <button class="btn btn-success btn-confirm" onclick="confirmCheckin('${memberId}')">✅ 确认签到</button>
+        <button class="btn btn-default btn-confirm" onclick="closeModal()">取消</button>
+      </div>
+    </div>
+  `);
+}
+
+function onTrainingSelectChange() {
+  const sel = document.getElementById('trainingSelect');
+  const wrap = document.getElementById('customTrainingWrap');
+  if (!sel || !wrap) return;
+  if (sel.value === '__custom__') {
+    wrap.classList.add('show');
+    document.getElementById('customTrainingInput').focus();
+  } else {
+    wrap.classList.remove('show');
+  }
+}
+
+function getSelectedTraining() {
+  const sel = document.getElementById('trainingSelect');
+  if (!sel) return '';
+  if (sel.value === '__custom__') {
+    const custom = (document.getElementById('customTrainingInput')?.value || '').trim();
+    if (!custom) {
+      toast('请输入训练内容', 'warning');
+      return null;
+    }
+    return custom;
+  }
+  return sel.value;
+}
+
+function confirmCheckin(memberId) {
+  const member = state.members.find(m => m.id === memberId);
+  if (!member) { toast('未找到会员', 'error'); return; }
+
+  const actualTraining = getSelectedTraining();
+  if (actualTraining === null) return; // empty custom input
+  const plannedTraining = member.nextTraining || '';
+
+  const isTempChanged = trainingMatch(actualTraining, plannedTraining) ? '否' : '是';
+  const remark = isTempChanged === '是'
+    ? `原计划：${plannedTraining}；实际训练：${actualTraining}`
+    : '按原计划训练';
+
+  // Create training record (VBA: GYM_会员签到 record creation)
+  const now = new Date();
+  const dateStr = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}:${String(now.getSeconds()).padStart(2,'0')}`;
+
+  const newRecord = {
+    date: dateStr,
+    memberId: memberId,
+    memberName: member.name,
+    coach: member.coach,
+    training: actualTraining,
+    tempChanged: isTempChanged,
+    remark: remark
+  };
+
+  state.records.push(newRecord);
+
+  // Update member status
+  syncMemberStatus(memberId);
+
+  saveData();
+  closeModal();
+  renderDashboard();
+  toast(`${member.name} 签到成功！训练内容：${actualTraining}`, 'success');
+}
+
+// VBA: GYM_撤销签到
+function undoCheckin(memberId) {
+  const member = state.members.find(m => m.id === memberId);
+  if (!member) return;
+
+  const today = getTodayStr();
+  const idx = state.records.findIndex(r => r.memberId === memberId && r.date && r.date.startsWith(today));
+  if (idx === -1) {
+    toast('未找到今日签到记录', 'warning');
+    return;
+  }
+
+  showModal(`
+    <h3>⚠️ 撤销签到</h3>
+    <p style="margin:12px 0;">确定要撤销 <strong>${member.name}</strong> 今天的签到记录吗？</p>
+    <p style="font-size:13px;color:#999;margin-bottom:12px;">训练内容：${state.records[idx].training}<br>签到时间：${formatDateTime(state.records[idx].date)}</p>
+    <p style="font-size:13px;color:#f00;">撤销后，会员的上一次/下一次训练将自动回退到上一条记录的状态。</p>
+    <div class="modal-actions">
+      <button class="btn btn-danger" onclick="confirmUndoCheckin(${idx}, '${memberId}')">确认撤销</button>
+      <button class="btn btn-default" onclick="closeModal()">取消</button>
+    </div>
+  `);
+}
+
+function confirmUndoCheckin(recordIdx, memberId) {
+  state.records.splice(recordIdx, 1);
+  syncMemberStatus(memberId);
+  saveData();
+  closeModal();
+  renderDashboard();
+  toast('签到已撤销', 'info');
+}
+
+// VBA: GYM_确认修改训练同步
+function showModifyTraining(memberId) {
+  const member = state.members.find(m => m.id === memberId);
+  if (!member) return;
+  const today = getTodayStr();
+  const record = state.records.find(r => r.memberId === memberId && r.date && r.date.startsWith(today));
+  if (!record) { toast('未找到今日记录', 'warning'); return; }
+
+  const allTrainings = ['胸肩','背','臀','核心','心肺','腿','肩','胸部','肩部','背部','心肺1','心肺2','手臂腹','对位训练'];
+
+  showModal(`
+    <h3>✏ 修改训练内容</h3>
+    <div class="form-group">
+      <label>会员</label>
+      <input type="text" value="${member.name} (#${member.id})" disabled>
+    </div>
+    <div class="form-group">
+      <label>原训练内容</label>
+      <input type="text" value="${record.training}" disabled>
+    </div>
+    <div class="form-group">
+      <label>修改为</label>
+      <select id="modifyTrainingSelect" onchange="onModifySelectChange()">
+        <option value="${record.training}">保持原样：${record.training}</option>
+        ${allTrainings.filter(t => t !== record.training).map(t => `<option value="${t}">${t}</option>`).join('')}
+        <option value="__custom__">✏️ 其他（手动输入）…</option>
+      </select>
+      <div class="custom-input" id="modifyCustomWrap" style="margin-top:8px;display:none;">
+        <input type="text" id="modifyCustomInput" placeholder="请输入训练内容，如：胸肩+有氧" autocomplete="off">
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-primary" onclick="confirmModifyTraining('${memberId}')">确认修改</button>
+      <button class="btn btn-default" onclick="closeModal()">取消</button>
+    </div>
+  `);
+}
+
+function onModifySelectChange() {
+  const sel = document.getElementById('modifyTrainingSelect');
+  const wrap = document.getElementById('modifyCustomWrap');
+  if (!sel || !wrap) return;
+  if (sel.value === '__custom__') {
+    wrap.style.display = 'block';
+    document.getElementById('modifyCustomInput').focus();
+  } else {
+    wrap.style.display = 'none';
+  }
+}
+
+function getModifyTraining() {
+  const sel = document.getElementById('modifyTrainingSelect');
+  if (!sel) return '';
+  if (sel.value === '__custom__') {
+    const custom = (document.getElementById('modifyCustomInput')?.value || '').trim();
+    if (!custom) {
+      toast('请输入训练内容', 'warning');
+      return null;
+    }
+    return custom;
+  }
+  return sel.value;
+}
+
+function confirmModifyTraining(memberId) {
+  const today = getTodayStr();
+  const record = state.records.find(r => r.memberId === memberId && r.date && r.date.startsWith(today));
+  if (!record) return;
+
+  const newTraining = getModifyTraining();
+  if (newTraining === null) return; // empty custom input
+  if (newTraining === record.training) {
+    toast('训练内容未改变', 'info');
+    closeModal();
+    return;
+  }
+
+  const plannedTraining = state.members.find(m => m.id === memberId)?.nextTraining || '';
+  const wasTemp = record.tempChanged === '是';
+  const oldRemark = wasTemp ? record.remark : '';
+
+  record.training = newTraining;
+  if (trainingMatch(newTraining, plannedTraining)) {
+    record.tempChanged = '否';
+    record.remark = '按原计划训练';
+  } else {
+    record.tempChanged = '是';
+    record.remark = `原计划：${plannedTraining}；实际训练：${newTraining}`;
+  }
+
+  syncMemberStatus(memberId);
+  saveData();
+  closeModal();
+  renderDashboard();
+  toast('训练内容已修改', 'success');
+}
+
+// ===================== MEMBER DATABASE (会员数据库) =====================
+function renderMembers() {
+  const search = (document.getElementById('memberSearch')?.value || '').toLowerCase();
+  let members = state.members.filter(m => m.name);
+  if (search) {
+    members = members.filter(m =>
+      m.name.toLowerCase().includes(search) ||
+      m.id.includes(search) ||
+      (m.coach || '').toLowerCase().includes(search)
+    );
+  }
+  members.sort((a, b) => Number(b.id) - Number(a.id));
+
+  const tbody = document.getElementById('memberTableBody');
+  if (members.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="9" class="empty-state"><div class="icon">📭</div>暂无会员数据</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = members.map(m => {
+    const ltClass = getTrainingClass(m.lastTraining);
+    const ntClass = getTrainingClass(m.nextTraining);
+    return `
+      <tr>
+        <td>${m.id}</td>
+        <td style="font-weight:600;cursor:pointer;color:var(--c-primary-ink);" onclick="showMemberDetail('${m.id}')">${m.name}</td>
+        <td>${m.coach || ''}</td>
+        <td><span class="badge ${ltClass ? '' : 'badge-gray'}" style="${ltClass ? `background:${getTrainingColor(m.lastTraining)};color:#000;` : ''}">${m.lastTraining || '-'}</span></td>
+        <td><span class="badge" style="background:${getTrainingColor(m.nextTraining) || '#E8E8E8'};color:#000;">${m.nextTraining || '-'}</span></td>
+        <td>${m.lastDate ? formatDateTime(m.lastDate) : '-'}</td>
+        <td style="font-size:12px;">${m.sequence || '-'}</td>
+        <td style="font-size:12px;max-width:200px;overflow:hidden;text-overflow:ellipsis;" title="${m.note || ''}">${m.note || ''}</td>
+        <td>
+          <button class="btn btn-default btn-sm" onclick="showMemberDetail('${m.id}')">详情</button>
+          <button class="btn btn-default btn-sm" onclick="showMemberModal('${m.id}')">编辑</button>
+          <button class="btn btn-danger btn-sm" onclick="deleteMember('${m.id}')">删除</button>
+        </td>
+      </tr>
+    `;
+  }).join('');
+}
+
+function showMemberModal(id) {
+  const member = id ? state.members.find(m => m.id === id) : null;
+  const isEdit = !!member;
+
+  showModal(`
+    <h3>${isEdit ? '编辑会员' : '新增会员'}</h3>
+    <div class="form-group">
+      <label>会员编号 *</label>
+      <input type="number" id="mId" value="${member?.id || ''}" ${isEdit ? 'disabled' : ''}>
+    </div>
+    <div class="form-group">
+      <label>会员姓名 *</label>
+      <input type="text" id="mName" value="${member?.name || ''}">
+    </div>
+    <div class="form-group">
+      <label>教练</label>
+      <input type="text" id="mCoach" value="${member?.coach || '姚伟乙'}">
+    </div>
+    <div class="form-group">
+      <label>训练顺序（用逗号分隔，如：臀,胸肩,背）</label>
+      <input type="text" id="mSequence" value="${member?.sequence || ''}">
+    </div>
+    <div class="form-group">
+      <label>备注</label>
+      <textarea id="mNote">${member?.note || ''}</textarea>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-primary" onclick="saveMember('${id || ''}')">保存</button>
+      <button class="btn btn-default" onclick="closeModal()">取消</button>
+    </div>
+  `);
+}
+
+function saveMember(id) {
+  const mid = document.getElementById('mId').value.trim();
+  const name = document.getElementById('mName').value.trim();
+  if (!mid || !name) { toast('编号和姓名不能为空', 'error'); return; }
+
+  const data = {
+    id: mid,
+    name: name,
+    coach: document.getElementById('mCoach').value.trim(),
+    sequence: document.getElementById('mSequence').value.trim(),
+    note: document.getElementById('mNote').value.trim(),
+  };
+
+  if (id) {
+    // Edit
+    const idx = state.members.findIndex(m => m.id === id);
+    if (idx >= 0) {
+      const old = state.members[idx];
+      state.members[idx] = { ...old, ...data };
+      syncMemberStatus(mid);
+    }
+  } else {
+    // Check duplicate
+    if (state.members.find(m => m.id === mid)) {
+      toast('会员编号已存在', 'error');
+      return;
+    }
+    data.lastTraining = '';
+    data.nextTraining = '';
+    data.lastDate = '';
+    syncMemberStatus(mid);
+    state.members.push(data);
+  }
+
+  saveData();
+  initCoachFilter();
+  closeModal();
+  renderMembers();
+  toast(id ? '会员已更新' : '会员已添加', 'success');
+}
+
+function deleteMember(id) {
+  const member = state.members.find(m => m.id === id);
+  if (!member) return;
+  showModal(`
+    <h3>⚠️ 删除会员</h3>
+    <p>确定要删除会员 <strong>${member.name}</strong> (编号${member.id}) 吗？</p>
+    <p style="font-size:13px;color:#f00;margin-top:8px;">此操作不可撤销，但训练记录会保留。</p>
+    <div class="modal-actions">
+      <button class="btn btn-danger" onclick="confirmDeleteMember('${id}')">确认删除</button>
+      <button class="btn btn-default" onclick="closeModal()">取消</button>
+    </div>
+  `);
+}
+
+function confirmDeleteMember(id) {
+  state.members = state.members.filter(m => m.id !== id);
+  saveData();
+  initCoachFilter();
+  closeModal();
+  renderMembers();
+  toast('会员已删除', 'info');
+}
+
+// ===================== TRAINING RECORDS (训练记录) =====================
+function renderRecords() {
+  const search = (document.getElementById('recordSearch')?.value || '').toLowerCase();
+  let records = [...state.records].reverse(); // newest first
+  if (search) {
+    records = records.filter(r =>
+      (r.memberName || '').toLowerCase().includes(search) ||
+      (r.training || '').toLowerCase().includes(search) ||
+      (r.memberId || '').includes(search)
+    );
+  }
+
+  const tbody = document.getElementById('recordTableBody');
+  if (records.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="8" class="empty-state"><div class="icon">📭</div>暂无训练记录</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = records.map((r, i) => {
+    const tClass = getTrainingClass(r.training);
+    const actualIdx = state.records.length - 1 - i;
+    return `
+      <tr>
+        <td style="font-size:12px;white-space:nowrap;">${formatDateTime(r.date)}</td>
+        <td>${r.memberId}</td>
+        <td style="font-weight:600;">${r.memberName}</td>
+        <td>${r.coach || ''}</td>
+        <td><span class="badge" style="background:${getTrainingColor(r.training) || '#E8E8E8'};color:#000;">${r.training || '-'}</span></td>
+        <td>${r.tempChanged === '是' ? '<span class="badge badge-yellow">是</span>' : '<span class="badge badge-gray">否</span>'}</td>
+        <td style="font-size:12px;max-width:250px;overflow:hidden;text-overflow:ellipsis;" title="${r.remark || ''}">${r.remark || ''}</td>
+        <td>
+          <button class="btn btn-danger btn-sm" onclick="deleteRecord(${actualIdx})">删除</button>
+        </td>
+      </tr>
+    `;
+  }).join('');
+}
+
+function showRecordModal() {
+  const memberOptions = state.members.filter(m => m.name).map(m =>
+    `<option value="${m.id}">${m.name} (#${m.id})</option>`
+  ).join('');
+
+  const now = new Date();
+  const dateStr = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+
+  showModal(`
+    <h3>新增训练记录</h3>
+    <div class="form-group">
+      <label>日期时间</label>
+      <input type="text" id="rDate" value="${dateStr}">
+    </div>
+    <div class="form-group">
+      <label>会员 *</label>
+      <select id="rMember" onchange="onRecordMemberChange()">
+        <option value="">请选择会员</option>
+        ${memberOptions}
+      </select>
+    </div>
+    <div class="form-group">
+      <label>训练内容</label>
+      <select id="rTraining">
+        <option value="胸肩">胸肩</option>
+        <option value="背">背</option>
+        <option value="臀">臀</option>
+        <option value="核心">核心</option>
+        <option value="心肺">心肺</option>
+        <option value="腿">腿</option>
+        <option value="肩">肩</option>
+        <option value="胸部">胸部</option>
+        <option value="肩部">肩部</option>
+        <option value="背部">背部</option>
+        <option value="心肺1">心肺1</option>
+        <option value="心肺2">心肺2</option>
+        <option value="手臂腹">手臂腹</option>
+        <option value="对位训练">对位训练</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>是否临时更换</label>
+      <select id="rTempChanged">
+        <option value="否">否</option>
+        <option value="是">是</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>备注</label>
+      <textarea id="rRemark">按原计划训练</textarea>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-primary" onclick="saveRecord()">保存</button>
+      <button class="btn btn-default" onclick="closeModal()">取消</button>
+    </div>
+  `);
+}
+
+function onRecordMemberChange() {
+  const mid = document.getElementById('rMember').value;
+  if (!mid) return;
+  const member = state.members.find(m => m.id === mid);
+  if (member) {
+    const seqArr = parseSequence(member.sequence);
+    const nextT = member.nextTraining || seqArr[0] || '';
+    if (nextT) {
+      const sel = document.getElementById('rTraining');
+      for (let opt of sel.options) {
+        if (opt.value === nextT || trainingMatch(opt.value, nextT)) {
+          sel.value = opt.value;
+          break;
+        }
+      }
+    }
+  }
+}
+
+function saveRecord() {
+  const mid = document.getElementById('rMember').value;
+  const member = state.members.find(m => m.id === mid);
+  if (!mid || !member) { toast('请选择会员', 'error'); return; }
+
+  const training = document.getElementById('rTraining').value;
+  const date = document.getElementById('rDate').value.trim();
+  if (!date) { toast('请填写日期', 'error'); return; }
+
+  // Add :00 if no seconds
+  let fullDate = date;
+  if (date.length <= 16) fullDate = date + ':00';
+
+  const record = {
+    date: fullDate,
+    memberId: mid,
+    memberName: member.name,
+    coach: member.coach,
+    training: training,
+    tempChanged: document.getElementById('rTempChanged').value,
+    remark: document.getElementById('rRemark').value.trim()
+  };
+
+  state.records.push(record);
+  syncMemberStatus(mid);
+  saveData();
+  closeModal();
+  renderRecords();
+  toast('训练记录已添加', 'success');
+}
+
+function deleteRecord(idx) {
+  if (idx < 0 || idx >= state.records.length) return;
+  const record = state.records[idx];
+  showModal(`
+    <h3>⚠️ 删除训练记录</h3>
+    <p>确定要删除 <strong>${record.memberName}</strong> 在 ${formatDateTime(record.date)} 的训练记录吗？</p>
+    <p style="font-size:13px;color:#f00;margin-top:8px;">删除后，会员的上一次/下一次训练将自动更新。</p>
+    <div class="modal-actions">
+      <button class="btn btn-danger" onclick="confirmDeleteRecord(${idx})">确认删除</button>
+      <button class="btn btn-default" onclick="closeModal()">取消</button>
+    </div>
+  `);
+}
+
+function confirmDeleteRecord(idx) {
+  const record = state.records[idx];
+  state.records.splice(idx, 1);
+  syncMemberStatus(record.memberId);
+  saveData();
+  closeModal();
+  renderRecords();
+  toast('训练记录已删除', 'info');
+}
+
+// ===================== DATA STATISTICS (数据统计) =====================
+// VBA: GYM_更新数据统计
+function updateStats(showMsg) {
+  try {
+    const wsStat = []; // output rows
+    const today = new Date();
+    today.setHours(0,0,0,0);
+    const weekStart = getWeekStart();
+
+    // Defensive: ensure arrays exist and filter out invalid entries
+    const members = Array.isArray(state.members) ? state.members.filter(m => m && typeof m === 'object' && m.name) : [];
+    const records = Array.isArray(state.records) ? state.records.filter(r => r && typeof r === 'object') : [];
+
+    members.forEach(member => {
+      const mid = String(member.id || '');
+      const memberRecords = records
+        .filter(r => String(r.memberId || '') === mid)
+        .map(r => ({ ...r, parsedDate: parseDate(r.date) }))
+        .filter(r => r.parsedDate);
+
+    // Deduplicate by day (VBA uses dayDict)
+    const dayDict = {};
+    memberRecords.forEach(r => {
+      const key = `${r.parsedDate.getFullYear()}-${r.parsedDate.getMonth()}-${r.parsedDate.getDate()}`;
+      if (!dayDict[key] || r.parsedDate > dayDict[key].parsedDate) {
+        dayDict[key] = r;
+      }
+    });
+
+    const uniqueRecords = Object.values(dayDict);
+    let latestDate = null;
+    let latestTraining = '';
+    let weekCount = 0;
+    let monthCount = 0;
+    let chestCount = 0;
+    let backCount = 0;
+    let legCount = 0;
+    let coreCount = 0;
+    let cardioCount = 0;
+
+    uniqueRecords.forEach(r => {
+      if (!latestDate || r.parsedDate > latestDate) {
+        latestDate = r.parsedDate;
+        latestTraining = r.training;
+      }
+      if (r.parsedDate >= weekStart && r.parsedDate <= today) {
+        weekCount++;
+      }
+      if (r.parsedDate.getFullYear() === today.getFullYear() && r.parsedDate.getMonth() === today.getMonth()) {
+        monthCount++;
+        const norm = normalizeTraining(r.training);
+        if (norm === '胸肩') chestCount++;
+        else if (norm === '背') backCount++;
+        else if (norm === '臀') legCount++;
+        else if (norm === '核心') coreCount++;
+        else if (norm === '心肺') cardioCount++;
+      }
+    });
+
+    let gapDays = '';
+    let status = '未训练';
+    if (latestDate) {
+      gapDays = Math.floor((today - latestDate) / (1000 * 60 * 60 * 24)) + '天';
+      status = weekCount >= 4 ? '达标' : '不足';
+    }
+
+    wsStat.push({
+      name: member.name,
+      coach: member.coach || '',
+      latestDate: latestDate,
+      latestTraining: latestTraining,
+      gapDays: gapDays,
+      weekCount: weekCount,
+      monthCount: monthCount,
+      status: status,
+      chestCount, backCount, legCount, coreCount, cardioCount
+    });
+  });
+
+  // Render overview
+  const totalMembers = wsStat.length;
+  const 达标Count = wsStat.filter(s => s.status === '达标').length;
+  const 不足Count = totalMembers - 达标Count;
+  const notTrained = wsStat.filter(s => s.gapDays === '').length;
+  const totalThisWeek = wsStat.reduce((s, x) => s + x.weekCount, 0);
+  const totalThisMonth = wsStat.reduce((s, x) => s + x.monthCount, 0);
+
+  document.getElementById('statsOverview').innerHTML = `
+    <div class="stat-card"><div class="num">${totalMembers}</div><div class="label">总会员数</div></div>
+    <div class="stat-card success"><div class="num">${达标Count}</div><div class="label">训练达标</div></div>
+    <div class="stat-card danger"><div class="num">${不足Count}</div><div class="label">训练不足</div></div>
+    <div class="stat-card warning"><div class="num">${notTrained}</div><div class="label">未训练</div></div>
+    <div class="stat-card"><div class="num">${totalThisWeek}</div><div class="label">本周总次数</div></div>
+    <div class="stat-card"><div class="num">${totalThisMonth}</div><div class="label">本月总次数</div></div>
+  `;
+
+  // Render table
+  const tbody = document.getElementById('statsTableBody');
+  if (wsStat.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="12" class="empty-state"><div class="icon">📭</div>暂无会员数据，请先在「会员数据库」添加会员</td></tr>';
+    if (showMsg) toast('数据统计已更新', 'success');
+    return;
+  }
+  tbody.innerHTML = wsStat.map(s => {
+    const tClass = getTrainingClass(s.latestTraining);
+    const gapClass = s.gapDays === '' || parseInt(s.gapDays) > 7 ? 'badge-red' : 'badge-gray';
+    const statusClass = s.status === '达标' ? 'badge-green' : 'badge-red';
+    return `
+      <tr>
+        <td style="font-weight:600;">${s.name}</td>
+        <td>${s.coach}</td>
+        <td><span class="badge ${tClass}" style="${tClass ? `background:${getTrainingColor(s.latestTraining)};color:#000;` : 'background:#E8E8E8;color:#666;'}">${s.latestTraining || '-'}</span></td>
+        <td><span class="badge ${gapClass}">${s.gapDays || '未训练'}</span></td>
+        <td>${s.weekCount}</td>
+        <td>${s.monthCount}</td>
+        <td><span class="badge ${statusClass}">${s.status}</span></td>
+        <td>${s.chestCount}</td>
+        <td>${s.backCount}</td>
+        <td>${s.legCount}</td>
+        <td>${s.coreCount}</td>
+        <td>${s.cardioCount}</td>
+      </tr>
+    `;
+  }).join('');
+
+  if (showMsg) toast('数据统计已更新', 'success');
+  } catch (err) {
+    console.error('updateStats error:', err);
+    toast('数据统计出错: ' + (err.message || '未知错误'), 'error');
+    const tbody = document.getElementById('statsTableBody');
+    if (tbody) tbody.innerHTML = '<tr><td colspan="12" class="empty-state" style="color:#c0392b;">数据统计失败，请检查控制台或尝试重置数据</td></tr>';
+  }
+}
+
+// ===================== MONTHLY CANDAR (月度训练日历) =====================
+// VBA: GYM_生成月度训练日历
+function renderCalendar() {
+  const monthInput = document.getElementById('calendarMonth');
+  let queryDate = new Date();
+  if (monthInput.value) {
+    queryDate = new Date(monthInput.value + '-01');
+  } else {
+    monthInput.value = `${queryDate.getFullYear()}-${String(queryDate.getMonth()+1).padStart(2,'0')}`;
+  }
+
+  const year = queryDate.getFullYear();
+  const month = queryDate.getMonth();
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+  let members = state.members.filter(m => m.name);
+  if (currentCoachFilter) {
+    members = members.filter(m => m.coach === currentCoachFilter);
+  }
+  members.sort((a, b) => Number(b.id) - Number(a.id));
+
+  const table = document.getElementById('calendarTable');
+  let html = '<thead><tr><th style="position:sticky;left:0;z-index:3;">会员姓名</th>';
+  for (let d = 1; d <= daysInMonth; d++) {
+    const dayDate = new Date(year, month, d);
+    const isWeekend = dayDate.getDay() === 0 || dayDate.getDay() === 6;
+    html += `<th style="${isWeekend ? 'background:#5B7BB0;' : ''}">${d}日</th>`;
+  }
+  html += '</tr></thead><tbody>';
+
+  members.forEach(m => {
+    html += `<tr><td class="member-name">${m.name}</td>`;
+    for (let d = 1; d <= daysInMonth; d++) {
+      const dayDate = new Date(year, month, d);
+      const records = state.records.filter(r => {
+        const rd = parseDate(r.date);
+        return rd && r.memberId === m.id && rd.getFullYear() === year && rd.getMonth() === month && rd.getDate() === d;
+      });
+      if (records.length > 0) {
+        const lastRec = records.sort((a, b) => parseDate(b.date) - parseDate(a.date))[0];
+        const tClass = getTrainingClass(lastRec.training);
+        html += `<td class="${tClass}" style="${tClass ? '' : 'background:#fff;'}">${lastRec.training || '-'}</td>`;
+      } else {
+        html += '<td class="empty"></td>';
+      }
+    }
+    html += '</tr>';
+  });
+
+  html += '</tbody>';
+  table.innerHTML = html;
+}
+
+// ===================== PARAMETERS (参数) =====================
+function renderParams() {
+  const tbody = document.getElementById('paramTableBody');
+  tbody.innerHTML = state.params.map((p, i) => {
+    const colorVal = PARAM_COLOR_MAP[p.color] || '#999';
+    return `
+      <tr>
+        <td>${p.type}</td>
+        <td style="font-weight:600;"><span class="badge" style="background:${getTrainingColor(p.current) || colorVal};color:#000;">${p.current}</span></td>
+        <td>${p.next}</td>
+        <td style="font-size:12px;">${p.keywords}</td>
+        <td>${p.enabled === '是' ? '<span class="badge badge-green">是</span>' : '<span class="badge badge-red">否</span>'}</td>
+        <td>${p.order}</td>
+        <td><div class="swatch" style="width:40px;height:20px;background:${colorVal};border-radius:3px;border:1px solid #ccc;display:inline-block;vertical-align:middle;"></div> ${p.color}</td>
+        <td>
+          <button class="btn btn-default btn-sm" onclick="showParamModal(${i})">编辑</button>
+          <button class="btn btn-danger btn-sm" onclick="deleteParam(${i})">删除</button>
+        </td>
+      </tr>
+    `;
+  }).join('');
+  updateBackupInfo();
+}
+
+function showParamModal(idx) {
+  const p = idx !== undefined && idx !== null ? state.params[idx] : null;
+  const isEdit = !!p;
+
+  showModal(`
+    <h3>${isEdit ? '编辑参数' : '新增参数'}</h3>
+    <div class="form-group">
+      <label>参数类型</label>
+      <input type="text" id="pType" value="${p?.type || '训练内容'}">
+    </div>
+    <div class="form-group">
+      <label>当前训练</label>
+      <input type="text" id="pCurrent" value="${p?.current || ''}">
+    </div>
+    <div class="form-group">
+      <label>下一阶段</label>
+      <input type="text" id="pNext" value="${p?.next || ''}">
+    </div>
+    <div class="form-group">
+      <label>关键词/别名（用逗号分隔）</label>
+      <textarea id="pKeywords">${p?.keywords || ''}</textarea>
+    </div>
+    <div class="form-group">
+      <label>是否启用</label>
+      <select id="pEnabled">
+        <option value="是" ${p?.enabled !== '否' ? 'selected' : ''}>是</option>
+        <option value="否" ${p?.enabled === '否' ? 'selected' : ''}>否</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>排序</label>
+      <input type="number" id="pOrder" value="${p?.order || '1'}">
+    </div>
+    <div class="form-group">
+      <label>颜色</label>
+      <select id="pColor">
+        ${Object.keys(PARAM_COLOR_MAP).map(c => `<option value="${c}" ${p?.color === c ? 'selected' : ''}>${c}</option>`).join('')}
+      </select>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-primary" onclick="saveParam(${idx !== undefined ? idx : -1})">保存</button>
+      <button class="btn btn-default" onclick="closeModal()">取消</button>
+    </div>
+  `);
+}
+
+function saveParam(idx) {
+  const data = {
+    type: document.getElementById('pType').value.trim(),
+    current: document.getElementById('pCurrent').value.trim(),
+    next: document.getElementById('pNext').value.trim(),
+    keywords: document.getElementById('pKeywords').value.trim(),
+    enabled: document.getElementById('pEnabled').value,
+    order: document.getElementById('pOrder').value.trim(),
+    color: document.getElementById('pColor').value,
+  };
+  if (!data.current) { toast('训练名称不能为空', 'error'); return; }
+
+  if (idx >= 0) {
+    state.params[idx] = data;
+  } else {
+    state.params.push(data);
+  }
+  saveData();
+  closeModal();
+  renderParams();
+  toast('参数已保存', 'success');
+}
+
+function deleteParam(idx) {
+  state.params.splice(idx, 1);
+  saveData();
+  renderParams();
+  toast('参数已删除', 'info');
+}
+
+function syncColorRules() {
+  // VBA: GYM_同步训练颜色规则 - just re-render all pages with color
+  renderParams();
+  renderDashboard();
+  renderMembers();
+  renderRecords();
+  updateStats(false);
+  renderCalendar();
+  toast('训练颜色规则已同步到所有页面', 'success');
+}
+
+// ===================== FAQ (常见问题) =====================
+function renderFAQ() {
+  const container = document.getElementById('faqContent');
+
+  const workflowSteps = [
+    { step: 1, loc: '会员数据库', action: '新增或维护会员信息：会员编号、姓名、教练、下一次训练、备注', result: '首页刷新后同步显示', note: '不要删除列、不要移动列，只改内容' },
+    { step: 2, loc: '首页', action: '点击【刷新首页】', result: '同步会员列表、签到按钮、当天签到状态', note: '建议每天第一次使用先刷新' },
+    { step: 3, loc: '首页', action: '选择教练下拉框', result: '首页、会员数据库、训练记录、数据统计、月度训练日历同步筛选', note: '选【全部教练】可恢复全部' },
+    { step: 4, loc: '首页', action: '点击会员对应【签到】按钮', result: '生成训练记录，并更新上一次/下一次训练', note: '同一天重复签到会被系统拦截' },
+    { step: 5, loc: '月度训练日历', action: '输入月份日期后点击【生成月度训练日历】', result: '按训练记录生成当月训练分布', note: '生成后如需筛选，回首页重新选择教练' },
+  ];
+
+  const faqItems = [
+    { q: '教练筛选后，月度训练日历又显示全部会员', cause: '点击【生成月度训练日历】后，系统会重新生成会员名单', fix: '回到【首页】，重新选择一次教练下拉框；或先选【全部教练】，再选回目标教练', note: '这是正常现象，不是数据丢失' },
+    { q: '筛选教练后，有些签到按钮不见了', cause: 'Excel按钮属于浮动控件，隐藏/显示行后可能出现位置错位', fix: '先选择【全部教练】→ 点击【刷新首页】→ 再重新选择目标教练', note: '不要手动拖动签到按钮' },
+    { q: '点击教练下拉框，提示无法运行某某宏', cause: '下拉框绑定的宏名不存在，通常是清理旧模块后导致', fix: '检查是否保留 GYM6教练下拉变化 和 教练下拉变化 两个兼容宏', note: '不要继续删除模块' },
+    { q: '点击【刷新首页】后，筛选状态恢复全部', cause: '刷新首页会重新同步会员列表和按钮，可能恢复隐藏行', fix: '推荐顺序：先【刷新首页】→ 再选择教练筛选', note: '刷新不等于筛选' },
+    { q: '月度训练日历颜色变了', cause: '旧代码可能清除了颜色、边框，或重新按训练内容上色', fix: '生成日历代码只保留 ClearContents，不使用 Clear / ClearFormats', note: '现在应只更新文字，不动格式' },
+    { q: '月度训练日历没有最新签到记录', cause: '日历不是实时刷新，而是根据训练记录重新生成', fix: '签到后进入【月度训练日历】，重新点击【生成月度训练日历】', note: '生成后如需筛选，回首页重新选教练' },
+    { q: '会员当天已签到，但想改训练内容', cause: '当天已有训练记录，直接再签到会被拦截', fix: '优先使用【修改训练内容】功能；不要随意手改多张表', note: '训练记录、上次训练、下次训练要保持一致' },
+    { q: '同一天重复点击签到按钮', cause: '系统检测到该会员当天已有训练记录', fix: '如确实误签，先使用【撤销签到】，再重新签到', note: '不要手动新增重复记录' },
+    { q: '新增会员后，首页没有出现', cause: '会员数据库新增后，首页尚未刷新', fix: '在【会员数据库】完整填写会员编号、姓名、教练、下一次训练 → 回首页点击【刷新首页】', note: '会员编号不能重复，姓名不要留空' },
+    { q: '新增教练后，教练筛选里没有出现', cause: '教练名单来源尚未同步', fix: '先在【会员数据库】里填入新教练 → 回首页点击【刷新首页】 → 再查看下拉框', note: '教练名称要前后一致，避免多空格' },
+    { q: '训练记录不建议随便删除行', cause: '数据统计和月度训练日历都依赖训练记录', fix: '误签到优先使用【撤销签到】；必须手删时，要重新检查统计和日历', note: '训练记录是系统流水' },
+    { q: '数据统计不对', cause: '常见原因：日期格式不对、会员编号重复、姓名被改、教练名称有空格、重复记录', fix: '检查训练记录日期、会员编号、姓名和教练名称；再刷新首页并重新筛选', note: '先检查源数据，再怀疑公式' },
+    { q: '筛选后看起来少了数据', cause: '行被隐藏了，不是数据删除', fix: '回首页教练下拉框选择【全部教练】即可恢复全部显示', note: '隐藏行仍然存在' },
+    { q: '打开文件提示宏被阻止', cause: '文件来自网络下载，Windows/Excel默认阻止宏', fix: '关闭Excel → 右键文件【属性】→ 勾选【解除锁定】→ 重新打开并启用宏', note: '不要随便启用所有宏' },
+    { q: '保存后宏功能失效', cause: '文件被另存为普通 .xlsx，宏被移除', fix: '必须保存为【Excel启用宏的工作簿（*.xlsm）】', note: '.xlsx 不支持VBA宏' },
+    { q: '表格卡顿、按钮位置异常、筛选后显示不正常', cause: 'Excel浮动控件或隐藏行状态未刷新', fix: '保存文件 → 关闭Excel → 重新打开 → 点击【刷新首页】→ 重新选择教练', note: '这是最安全的恢复动作' },
+  ];
+
+  let html = `
+    <div class="faq-section">
+      <h3>一、日常使用流程</h3>
+      <div class="table-wrap" style="margin-bottom:20px;">
+        <table>
+          <thead><tr><th>步骤</th><th>操作位置</th><th>操作内容</th><th>系统结果</th><th>注意事项</th></tr></thead>
+          <tbody>
+            ${workflowSteps.map(s => `
+              <tr>
+                <td><strong>${s.step}</strong></td>
+                <td>${s.loc}</td>
+                <td style="text-align:left;">${s.action}</td>
+                <td style="text-align:left;">${s.result}</td>
+                <td style="text-align:left;font-size:12px;color:#666;">${s.note}</td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="faq-section">
+      <h3>二、常见问题 / 小Tips</h3>
+      ${faqItems.map((item, i) => `
+        <div class="faq-item">
+          <div class="question">${String(i+1).padStart(2,'0')}. ${item.q}</div>
+          <div class="answer">
+            <p><span class="tag badge-blue">可能原因</span>${item.cause}</p>
+            <p style="margin-top:4px;"><span class="tag badge-green">处理方法</span>${item.fix}</p>
+            <p style="margin-top:4px;"><span class="tag badge-yellow">备注</span>${item.note}</p>
+          </div>
+        </div>
+      `).join('')}
+    </div>
+  `;
+
+  container.innerHTML = html;
+}
+
+// ===================== MEMBER DETAIL (会员详情) =====================
+function showMemberDetail(memberId) {
+  const member = state.members.find(m => m.id === memberId);
+  if (!member) { toast('未找到会员', 'error'); return; }
+
+  // Get member's records sorted by date
+  const memberRecords = state.records
+    .filter(r => r.memberId === memberId)
+    .sort((a, b) => new Date(a.date.replace(/-/g,'/')) - new Date(b.date.replace(/-/g,'/')))
+    .reverse();
+
+  // Calculate body part distribution
+  const dist = {};
+  memberRecords.forEach(r => {
+    const norm = normalizeTraining(r.training);
+    if (!norm) return;
+    dist[norm] = (dist[norm] || 0) + 1;
+  });
+  const totalDist = Object.values(dist).reduce((a, b) => a + b, 0) || 1;
+
+  // Training plan visualization
+  const seqArr = parseSequence(member.sequence);
+  const planHtml = renderTrainingPlan(seqArr, member.lastTraining, member.nextTraining);
+
+  // Recent 10 records timeline
+  const recentRecords = memberRecords.slice(0, 10);
+  const timelineHtml = recentRecords.length > 0
+    ? `<div class="timeline">
+        ${recentRecords.map(r => {
+          const tColor = getTrainingColor(r.training);
+          const tClass = getTrainingClass(r.training);
+          return `
+            <div class="timeline-item">
+              <span class="date">${formatDateTime(r.date)}</span>
+              <span class="training" style="background:${tColor || '#E8E8E8'};padding:2px 8px;border-radius:3px;margin-left:8px;">${r.training || '未记录'}</span>
+              ${r.tempChanged === '是' ? '<span class="badge badge-yellow" style="margin-left:4px;">临时</span>' : ''}
+            </div>
+          `;
+        }).join('')}
+      </div>`
+    : '<p style="color:#999;font-size:13px;">暂无训练记录</p>';
+
+  // Distribution bars
+  const distColors = { '胸肩': '#F4B084', '背': '#9DC3E6', '臀': '#A9D08E', '核心': '#FFD966', '心肺': '#CCC0DA' };
+  const distHtml = Object.entries(dist).length > 0
+    ? `<div class="dist-list">
+        ${Object.entries(dist).sort((a, b) => b[1] - a[1]).map(([name, count]) => {
+          const pct = Math.round(count / totalDist * 100);
+          const color = distColors[name] || '#999';
+          return `
+            <div class="dist-item">
+              <span class="name">${name}</span>
+              <div class="bar" style="width:${pct * 3}px;background:${color};"></div>
+              <span class="count">${count}次 (${pct}%)</span>
+            </div>
+          `;
+        }).join('')}
+      </div>`
+    : '<p style="color:#999;font-size:13px;">暂无数据</p>';
+
+  showModal(`
+    <div class="member-detail">
+      <div class="detail-header">
+        <h3>${member.name} <span class="id-badge">#${member.id}</span></h3>
+        <div>
+          <button class="btn btn-default btn-sm" onclick="closeModal(); showMemberModal('${member.id}');">✏ 编辑</button>
+          <button class="btn btn-default btn-sm" onclick="closeModal()">✕ 关闭</button>
+        </div>
+      </div>
+
+      <div class="detail-section">
+        <h4>基本信息</h4>
+        <div class="detail-grid">
+          <div class="item"><span class="key">教练：</span><span class="val">${member.coach || '未指定'}</span></div>
+          <div class="item"><span class="key">上次训练：</span><span class="val" style="background:${getTrainingColor(member.lastTraining) || '#E8E8E8'};padding:1px 6px;border-radius:3px;">${member.lastTraining || '-'}</span></div>
+          <div class="item"><span class="key">下次训练：</span><span class="val" style="background:${getTrainingColor(member.nextTraining) || '#E8E8E8'};padding:1px 6px;border-radius:3px;">${member.nextTraining || '-'}</span></div>
+          <div class="item"><span class="key">最后训练：</span><span class="val">${member.lastDate ? formatDateTime(member.lastDate) : '-'}</span></div>
+          <div class="item"><span class="key">总训练次数：</span><span class="val">${memberRecords.length} 次</span></div>
+        </div>
+      </div>
+
+      <div class="detail-section">
+        <h4>训练计划</h4>
+        ${planHtml}
+      </div>
+
+      <div class="detail-section">
+        <h4>训练部位分布（全部记录）</h4>
+        ${distHtml}
+      </div>
+
+      <div class="detail-section">
+        <h4>最近训练记录</h4>
+        ${timelineHtml}
+      </div>
+
+      ${member.note ? `
+      <div class="detail-section">
+        <h4>备注</h4>
+        <p style="font-size:13px;background:#f9f9f9;padding:10px;border-radius:6px;">${member.note}</p>
+      </div>
+      ` : ''}
+    </div>
+  `);
+}
+
+// ===================== TRAINING PLAN VISUALIZATION =====================
+function renderTrainingPlan(seqArr, lastTraining, nextTraining) {
+  if (!seqArr || seqArr.length === 0) {
+    return '<p style="color:#999;font-size:13px;">未设置训练顺序</p>';
+  }
+
+  // Normalize for comparison
+  const normLast = normalizeTraining(lastTraining);
+  const normNext = normalizeTraining(nextTraining);
+
+  const nodes = seqArr.map((item, i) => {
+    const norm = normalizeTraining(item);
+    const isCurrent = norm === normLast && normLast;
+    const isNext = norm === normNext && normNext;
+    const color = getTrainingColor(item);
+    const cls = isCurrent ? 'current' : (isNext ? 'next' : '');
+    const label = isCurrent ? ' (上次)' : (isNext ? ' (下次)' : '');
+    return `<span class="plan-node ${cls}" style="border-color:${color || '#ccc'};background:${color ? color + '33' : '#fff'};color:${color || '#333'};">${item}${label}</span>`;
+  });
+
+  // Add arrows between nodes
+  const html = nodes.map((node, i) => {
+    if (i < nodes.length - 1) {
+      return node + '<span class="plan-arrow">→</span>';
+    }
+    return node;
+  }).join('');
+
+  return `
+    <div class="training-plan">
+      ${html}
+      <span class="plan-loop">↻ 循环</span>
+    </div>
+    <p style="font-size:12px;color:#999;margin-top:6px;">实线边框 = 上次训练 | 虚线边框 = 下次训练 | 签到后自动推进</p>
+  `;
+}
+
+// ===================== EXCEL IMPORT (智能表头识别) =====================
+// 支持旧表格：列顺序任意、表头文字不同都能正确导入
+const HEADER_ALIASES = {
+  // 会员数据库
+  'member_id':    ['会员编号','编号','工号','会员id','会员id号','会员号','卡号','id'],
+  'member_name':  ['会员姓名','姓名','会员名字','名字','名称'],
+  'coach':        ['教练','教练姓名','私人教练','教练名字','教练员'],
+  'last_training':['上一次训练','上次训练','上期训练','上次内容','上一训练','最近训练内容','上次练'],
+  'next_training':['下一次训练','下次训练','计划训练','下期训练','下次内容','下一训练','下次练'],
+  'last_date':    ['最后训练日期','最后训练','最近训练日期','最近日期','上次训练日期','最后日期','最近一次训练日期'],
+  'sequence':     ['训练顺序','顺序','训练计划','循环顺序','计划顺序'],
+  'note':         ['备注','说明','注释','备注说明'],
+  // 训练记录
+  'date':         ['日期','签到时间','训练日期','时间','签到日期'],
+  'training':     ['训练内容','训练项目','训练部位','内容','训练','项目','训练名称'],
+  'temp_changed': ['是否临时更换','临时更换','临时','是否更换','更换'],
+  'remark':       ['备注','说明','注释','备注说明'],
+  // 参数
+  'param_type':   ['参数类型','类型','参数'],
+  'param_current':['当前训练','训练内容','当前'],
+  'param_next':   ['下一阶段','下一阶段训练','下次训练','下一训练','下一项'],
+  'param_keywords':['关键词','关键词/别名','别名','关键词别名','关键字'],
+  'param_enabled':['是否启用','启用','enabled'],
+  'param_order':  ['排序','顺序','order'],
+  'param_color':  ['颜色','color','填充色'],
+};
+
+function findHeaderRow(rows) {
+  // 扫描前 8 行，找包含已知表头关键词的那一行作为表头
+  for (let i = 0; i < Math.min(rows.length, 8); i++) {
+    const row = (rows[i] || []).map(c => String(c == null ? '' : c).trim());
+    const joined = row.join('|');
+    const known = ['会员编号','姓名','日期','签到时间','训练内容','训练顺序','参数','教练','当前训练','备注','工号','编号'];
+    if (known.some(k => joined.includes(k))) {
+      return { rowIdx: i, header: row };
+    }
+  }
+  return { rowIdx: 0, header: (rows[0] || []).map(c => String(c == null ? '' : c).trim()) };
+}
+
+function buildColumnMap(header) {
+  const map = {};
+  header.forEach((cell, idx) => {
+    if (!cell) return;
+    for (const [field, aliases] of Object.entries(HEADER_ALIASES)) {
+      if (map[field] !== undefined) continue;
+      for (const alias of aliases) {
+        if (cell.toLowerCase().includes(alias.toLowerCase())) {
+          map[field] = idx;
+          break;
+        }
+      }
+    }
+  });
+  return map;
+}
+
+// 内容启发式推断：表头匹配不到时，根据列内容特征猜测列用途（兼容口语化表头）
+function inferColumns(rows, header, colMap) {
+  // 仅当表头像数据表（会员/记录）时才推断，避免参数表被误判
+  const headerJoined = header.join('|');
+  if (!/编号|姓名|日期|时间|教练|工号|签到|训练内容|会员|号/.test(headerJoined)) return colMap;
+
+  const sample = rows.slice(1, 8).filter(r => r && r.some(c => String(c == null ? '' : c).trim() !== ''));
+  if (sample.length === 0) return colMap;
+
+  const colCount = Math.max(...sample.map(r => r.length), header.length);
+  const matchRatio = (colIdx, test) => {
+    let hit = 0, total = 0;
+    sample.forEach(r => {
+      if (colIdx >= r.length) return;
+      const v = String(r[colIdx] == null ? '' : r[colIdx]).trim();
+      if (v === '') return;
+      total++;
+      if (test(v)) hit++;
+    });
+    return total > 0 ? hit / total : 0;
+  };
+
+  const isDateLike = v => /^\d{4}[-/.]\d{1,2}[-/.]\d{1,2}/.test(v)
+    || /^\d{1,2}[-/.]\d{1,2}[-/.]\d{2,4}/.test(v)
+    || (v !== '' && !isNaN(Number(v)) && Number(v) > 20000 && Number(v) < 80000);
+
+  // 优先按表头文字选列，其次按内容特征
+  const pickCol = (keywordRe, contentTest, ratio) => {
+    for (let c = 0; c < colCount; c++) {
+      const h = String(header[c] || '');
+      if (keywordRe && keywordRe.test(h) && contentTest) {
+        if (matchRatio(c, contentTest) >= ratio) return c;
+      }
+    }
+    for (let c = 0; c < colCount; c++) {
+      const h = String(header[c] || '');
+      if (colMap.date === c) continue;
+      if (contentTest && matchRatio(c, contentTest) >= ratio) return c;
+    }
+    return -1;
+  };
+
+  if (colMap.date === undefined) {
+    const c = pickCol(null, isDateLike, 0.7);
+    if (c !== -1) colMap.date = c;
+  }
+  if (colMap.member_id === undefined) {
+    const c = pickCol(/号|码|id|ID/, v => /^\d{1,6}$/.test(v), 0.8);
+    if (c !== -1) colMap.member_id = c;
+  }
+  if (colMap.member_name === undefined) {
+    const c = pickCol(/姓|名|谁|人/, v => /^[\u4e00-\u9fa5]{2,4}$/.test(v), 0.8);
+    if (c !== -1) colMap.member_name = c;
+  }
+  if (colMap.training === undefined) {
+    const c = pickCol(/训练|内容|项目|部位|练/, v => /胸|肩|背|臀|腿|核心|心肺|有氧|腹/.test(v), 0.6);
+    if (c !== -1) colMap.training = c;
+  }
+  return colMap;
+}
+
+function cellVal(row, colMap, field, def='') {
+  const idx = colMap[field];
+  if (idx === undefined || row[idx] === undefined || row[idx] === null) return def;
+  return String(row[idx]).trim();
+}
+
+function excelDateToStr(v) {
+  if (v instanceof Date) return formatDateObj(v);
+  if (typeof v === 'number' && v > 20000 && v < 80000) {
+    // Excel 序列号 → Date（1900 系统）
+    const d = new Date(Math.round((v - 25569) * 86400000));
+    return formatDateObj(d);
+  }
+  return String(v == null ? '' : v).trim();
+}
+
+function handleExcelImport(input) {
+  const file = input.files[0];
+  if (!file) return;
+
+  if (typeof XLSX === 'undefined') {
+    toast('Excel解析库未加载，请检查网络连接后重试', 'error');
+    input.value = '';
+    return;
+  }
+
+  snapshotPreImport();
+
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      const data = new Uint8Array(e.target.result);
+      const wb = XLSX.read(data, { type: 'array', cellDates: true });
+      const sheetNames = wb.SheetNames;
+      let imported = { members: 0, records: 0, params: 0 };
+
+      sheetNames.forEach(name => {
+        const ws = wb.Sheets[name];
+        if (!ws) return;
+        const rows = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '' });
+        if (rows.length === 0) return;
+
+        const { rowIdx, header } = findHeaderRow(rows);
+        const colMap = inferColumns(rows, header, buildColumnMap(header));
+
+        // 表类型判定：用表头文字特征（比字段映射更可靠）
+        const headerStr = header.join('|');
+        const isRecordSheet = colMap.training !== undefined
+          && ((/日期|时间|签到/.test(headerStr) && !/最后|上次|最近/.test(headerStr)) || headerStr.includes('哪天'));
+        const isMemberSheet = !isRecordSheet && colMap.member_id !== undefined && colMap.member_name !== undefined;
+        const isParamSheet = !isRecordSheet && !isMemberSheet && colMap.param_type !== undefined;
+
+        // ---- 会员数据库 ----
+        if (isMemberSheet) {
+          const newMembers = [];
+          for (let i = rowIdx + 1; i < rows.length; i++) {
+            const r = rows[i];
+            if (!r || r.length === 0) continue;
+            const mid = cellVal(r, colMap, 'member_id');
+            const name = cellVal(r, colMap, 'member_name');
+            if (!mid || !name) continue;
+            const lastDateRaw = colMap.last_date !== undefined ? r[colMap.last_date] : '';
+            newMembers.push({
+              id: mid,
+              name: name,
+              coach: cellVal(r, colMap, 'coach', '姚伟乙') || '姚伟乙',
+              lastTraining: cellVal(r, colMap, 'last_training'),
+              nextTraining: cellVal(r, colMap, 'next_training'),
+              lastDate: excelDateToStr(lastDateRaw),
+              sequence: cellVal(r, colMap, 'sequence'),
+              note: cellVal(r, colMap, 'note') || cellVal(r, colMap, 'remark'),
+            });
+          }
+          if (newMembers.length > 0) {
+            state.members = newMembers;
+            imported.members = newMembers.length;
+          }
+        }
+
+        // ---- 训练记录 ----
+        if (isRecordSheet) {          const newRecords = [];
+          for (let i = rowIdx + 1; i < rows.length; i++) {
+            const r = rows[i];
+            if (!r || r.length === 0) continue;
+            if (colMap.date === undefined) continue;
+            const dateVal = excelDateToStr(r[colMap.date]);
+            if (!dateVal) continue;
+            const mid = cellVal(r, colMap, 'member_id');
+            if (!mid) continue;
+            const memberName = cellVal(r, colMap, 'member_name') ||
+              (state.members.find(m => m.id === mid)?.name || '');
+            newRecords.push({
+              date: dateVal,
+              memberId: mid,
+              memberName: memberName,
+              coach: cellVal(r, colMap, 'coach', '姚伟乙') || '姚伟乙',
+              training: cellVal(r, colMap, 'training'),
+              tempChanged: cellVal(r, colMap, 'temp_changed', '否') || '否',
+              remark: cellVal(r, colMap, 'remark') || cellVal(r, colMap, 'note'),
+            });
+          }
+          if (newRecords.length > 0) {
+            state.records = newRecords;
+            imported.records = newRecords.length;
+          }
+        }
+
+        // ---- 参数 ----
+        if (isParamSheet) {
+          const newParams = [];
+          for (let i = rowIdx + 1; i < rows.length; i++) {
+            const r = rows[i];
+            if (!r || r.length === 0) continue;
+            const ptype = cellVal(r, colMap, 'param_type');
+            const pcurrent = cellVal(r, colMap, 'param_current');
+            if (ptype && ptype !== '参数类型' && ptype !== '训练内容' && ptype !== '类型') continue;
+            if (!pcurrent) continue;
+            newParams.push({
+              type: '训练内容',
+              current: pcurrent,
+              next: cellVal(r, colMap, 'param_next'),
+              keywords: cellVal(r, colMap, 'param_keywords'),
+              enabled: cellVal(r, colMap, 'param_enabled', '是') || '是',
+              order: cellVal(r, colMap, 'param_order'),
+              color: cellVal(r, colMap, 'param_color'),
+            });
+          }
+          if (newParams.length > 0) {
+            state.params = newParams;
+            imported.params = newParams.length;
+          }
+        }
+      });
+
+      if (imported.members === 0 && imported.records === 0 && imported.params === 0) {
+        toast('未能识别表格内容：请确认表头包含「会员编号/姓名」或「日期/训练内容」等列名', 'warning');
+        input.value = '';
+        return;
+      }
+
+      // Sync all member statuses after import
+      state.members.forEach(m => syncMemberStatus(m.id));
+      saveData();
+      initCoachFilter();
+      renderParams();
+      closeModal();
+
+      toast(`导入成功！会员 ${imported.members} 人，训练记录 ${imported.records} 条，参数 ${imported.params} 条`, 'success');
+      // Reset file input
+      input.value = '';
+    } catch(err) {
+      console.error('Import error:', err);
+      toast('导入失败：' + err.message, 'error');
+      input.value = '';
+    }
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+function formatDateObj(d) {
+  if (!d) return '';
+  const Y = d.getFullYear();
+  const M = String(d.getMonth()+1).padStart(2,'0');
+  const D = String(d.getDate()).padStart(2,'0');
+  const h = String(d.getHours()).padStart(2,'0');
+  const m = String(d.getMinutes()).padStart(2,'0');
+  const s = String(d.getSeconds()).padStart(2,'0');
+  return `${Y}-${M}-${D} ${h}:${m}:${s}`;
+}
+
+// ===================== MODAL =====================
+function showModal(html) {
+  document.getElementById('modalContent').innerHTML = html;
+  document.getElementById('modalOverlay').classList.add('show');
+}
+
+function closeModal() {
+  document.getElementById('modalOverlay').classList.remove('show');
+}
+
+// Close on overlay click
+document.getElementById('modalOverlay').addEventListener('click', function(e) {
+  if (e.target === this) closeModal();
+});
+
+// ===================== INIT =====================
+init();
+</script>
+</body>
+</html>
