@@ -257,13 +257,30 @@ tbody tr:nth-child(even):hover { background: #F7FEE7; }
 .checkin-dialog .planned-training .label { color: var(--c-text-light); }
 .checkin-dialog .training-select { margin: 16px 0; text-align: left; }
 .checkin-dialog .training-select label { display: block; font-size: 14px; color: #666; margin-bottom: 6px; font-weight: 600; }
-.checkin-dialog .training-select select { padding: 10px 14px; font-size: 16px; border: 2px solid var(--c-primary-dark); border-radius: 4px; width: 100%; }
 .checkin-dialog .custom-input { margin-top: 10px; display: none; }
 .checkin-dialog .custom-input.show { display: block; }
 .checkin-dialog .custom-input input {
   width: 100%; padding: 10px 14px; font-size: 16px; border: 2px solid var(--c-primary-dark);
   border-radius: 4px; font-family: inherit;
 }
+/* 训练内容按钮选择器（替代原生下拉） */
+.train-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 8px; }
+.train-chip {
+  padding: 12px 6px; border-radius: 10px; text-align: center; cursor: pointer;
+  font-weight: 700; font-size: 15px; color: #1F2937; border: 3px solid transparent;
+  transition: transform 0.12s, border-color 0.12s, box-shadow 0.12s; user-select: none;
+}
+.train-chip:hover { transform: translateY(-2px); box-shadow: 0 3px 8px rgba(0,0,0,0.15); }
+.train-chip.sel {
+  border-color: #111827; box-shadow: 0 0 0 3px rgba(190,242,100,0.55);
+  position: relative;
+}
+.train-chip.sel::after { content: '✓'; position: absolute; top: 2px; right: 6px; font-size: 13px; }
+.more-toggle {
+  margin-top: 10px; font-size: 13px; color: var(--c-primary-ink);
+  cursor: pointer; text-align: center; user-select: none;
+}
+.more-toggle:hover { text-decoration: underline; }
 .checkin-dialog .actions { display: flex; gap: 10px; justify-content: center; margin-top: 20px; }
 .checkin-dialog .actions .btn { flex: 1; max-width: 200px; }
 .checkin-dialog .actions .btn-confirm { padding: 12px 24px; font-size: 17px; font-weight: 700; border-radius: 6px; }
@@ -402,7 +419,7 @@ tbody tr:nth-child(even):hover { background: #F7FEE7; }
   .btn-sm { min-height: 36px; padding: 7px 12px; font-size: 13px; }
   .btn-lg { min-height: 50px; font-size: 17px; }
   input, select, textarea { font-size: 16px !important; }
-  #memberSearch, #recordSearch, #coachFilter { width: 100% !important; min-height: 44px; }
+  #memberSearch, #recordSearch, #coachFilter, #coachFilterMembers, #coachFilterRecords { width: 100% !important; min-height: 44px; }
   .filter-bar { flex-direction: column; align-items: stretch; gap: 8px; }
   .filter-bar select, .filter-bar input { width: 100%; min-height: 44px; }
   .form-inline { flex-direction: column; align-items: stretch; }
@@ -533,6 +550,9 @@ tbody tr:nth-child(even):hover { background: #F7FEE7; }
     <div class="page-header">
       <h2>👥 会员数据库</h2>
       <div class="actions">
+        <select id="coachFilterMembers" onchange="applyCoachFilter(this.id)" style="padding:8px 16px;border:1px solid var(--c-border);border-radius:4px;font-size:14px;">
+          <option value="">全部教练</option>
+        </select>
         <input type="text" id="memberSearch" placeholder="搜索姓名/编号..." oninput="renderMembers()" style="padding:8px 12px;border:1px solid var(--c-border);border-radius:4px;font-size:14px;width:180px;">
         <button class="btn btn-success" onclick="showMemberModal()">➕ 新增会员</button>
         <button class="btn btn-primary" onclick="syncAllMembers()">🔄 同步训练状态</button>
@@ -559,6 +579,9 @@ tbody tr:nth-child(even):hover { background: #F7FEE7; }
     <div class="page-header">
       <h2>📋 训练记录</h2>
       <div class="actions">
+        <select id="coachFilterRecords" onchange="applyCoachFilter(this.id)" style="padding:8px 16px;border:1px solid var(--c-border);border-radius:4px;font-size:14px;">
+          <option value="">全部教练</option>
+        </select>
         <input type="text" id="recordSearch" placeholder="搜索姓名/内容..." oninput="renderRecords()" style="padding:8px 12px;border:1px solid var(--c-border);border-radius:4px;font-size:14px;width:180px;">
         <button class="btn btn-success" onclick="showRecordModal()">➕ 新增记录</button>
       </div>
@@ -942,7 +965,7 @@ const INITIAL_DATA = {
 let state = { members: [], records: [], params: [] };
 let currentCoachFilter = '';
 // 版本号：每次更新都会变，用来确认你看到的是不是最新版
-const APP_VERSION = '2026-09-10 13:30';
+const APP_VERSION = '2026-09-10 13:45';
 
 // ===================== 云同步（腾讯云开发 CloudBase） =====================
 const CLOUD_SDK_URLS = [
@@ -1442,6 +1465,57 @@ function setupAutoSaveHooks() {
   });
 }
 
+// 训练内容按钮选择器（替代原生下拉，去掉了重复项）
+const MAIN_TRAININGS = ['胸肩','背','臀','核心','心肺'];
+const MORE_TRAININGS = ['腿','肩','心肺1','心肺2','手臂腹','对位训练'];
+
+function renderTrainChips(current) {
+  const main = [...new Set([...MAIN_TRAININGS, current].filter(Boolean))];
+  const more = MORE_TRAININGS.filter(t => t !== current);
+  const chip = t =>
+    '<div class="train-chip' + (t === current ? ' sel' : '') + '" data-t="' + t +
+    '" style="background:' + (getTrainingColor(t) || '#E8E8E8') + ';" onclick="selectTraining(\'' + t + '\')">' + t + '</div>';
+  return '' +
+    '<input type="hidden" id="trainingSelect" value="' + (current || '') + '">' +
+    '<div class="train-grid" id="trainGrid">' + main.map(chip).join('') + '</div>' +
+    '<div class="more-toggle" onclick="toggleMoreTrainings()">更多选项 ▾</div>' +
+    '<div class="train-grid" id="trainGridMore" style="display:none;">' + more.map(chip).join('') + '</div>' +
+    '<div class="custom-input" id="customTrainingWrap">' +
+    '<input type="text" id="customTrainingInput" placeholder="✏️ 手动输入，如：胸肩+有氧" autocomplete="off" oninput="onCustomTrainingInput()">' +
+    '</div>';
+}
+
+function selectTraining(t) {
+  const hidden = document.getElementById('trainingSelect');
+  if (hidden) hidden.value = t;
+  document.querySelectorAll('.train-chip').forEach(c => c.classList.toggle('sel', c.dataset.t === t));
+  const wrap = document.getElementById('customTrainingWrap');
+  if (wrap) wrap.classList.remove('show');
+  const inp = document.getElementById('customTrainingInput');
+  if (inp) inp.value = '';
+}
+
+function toggleMoreTrainings() {
+  const m = document.getElementById('trainGridMore');
+  if (m) m.style.display = (m.style.display === 'none') ? 'grid' : 'none';
+}
+
+function onCustomTrainingInput() {
+  const v = (document.getElementById('customTrainingInput')?.value || '').trim();
+  document.querySelectorAll('.train-chip').forEach(c => c.classList.remove('sel'));
+  document.getElementById('customTrainingWrap').classList.add('show');
+  const hidden = document.getElementById('trainingSelect');
+  if (hidden) hidden.value = v || '__custom__';
+}
+
+function getSelectedTraining() {
+  const custom = (document.getElementById('customTrainingInput')?.value || '').trim();
+  if (custom) return custom;
+  const sel = document.getElementById('trainingSelect')?.value || '';
+  if (!sel || sel === '__custom__') { toast('请输入或选择训练内容', 'warning'); return null; }
+  return sel;
+}
+
 function escapeHtml(text) {
   if (!text) return '';
   const div = document.createElement('div');
@@ -1890,18 +1964,30 @@ function syncAllMembers() {
 // ===================== COACH FILTER =====================
 function initCoachFilter() {
   const coaches = [...new Set(state.members.map(m => m.coach).filter(c => c))];
-  const sel = document.getElementById('coachFilter');
-  sel.innerHTML = '<option value="">全部教练</option>';
-  coaches.forEach(c => {
-    const opt = document.createElement('option');
-    opt.value = c; opt.textContent = c;
-    sel.appendChild(opt);
+  ['coachFilter', 'coachFilterMembers', 'coachFilterRecords'].forEach(id => {
+    const sel = document.getElementById(id);
+    if (!sel) return;
+    sel.innerHTML = '<option value="">全部教练</option>';
+    coaches.forEach(c => {
+      const opt = document.createElement('option');
+      opt.value = c; opt.textContent = c;
+      sel.appendChild(opt);
+    });
+    sel.value = currentCoachFilter;
   });
 }
 
-function applyCoachFilter() {
-  currentCoachFilter = document.getElementById('coachFilter').value;
+function applyCoachFilter(sourceId) {
+  const el = document.getElementById(sourceId || 'coachFilter');
+  currentCoachFilter = el ? el.value : '';
+  ['coachFilter', 'coachFilterMembers', 'coachFilterRecords'].forEach(id => {
+    const sel = document.getElementById(id);
+    if (sel && sel.value !== currentCoachFilter) sel.value = currentCoachFilter;
+  });
   renderDashboard();
+  renderMembers();
+  renderRecords();
+  updateHeroClock();
 }
 
 // ===================== 首页问候横幅 =====================
@@ -2079,15 +2165,6 @@ function startCheckin(memberId) {
     return;
   }
 
-  // Show check-in dialog
-  const seqArr = parseSequence(member.sequence);
-  const allTrainings = [...new Set([
-    '胸肩', '背', '臀', '核心', '心肺',
-    ...seqArr,
-    '腿', '肩', '胸部', '肩部', '背部',
-    '心肺1', '心肺2', '手臂腹', '对位训练'
-  ])];
-
   showModal(`
     <div class="checkin-dialog">
       <h3 style="font-size:20px;margin-bottom:14px;">✅ 会员签到</h3>
@@ -2102,15 +2179,9 @@ function startCheckin(memberId) {
         </span>
       </div>
       <div class="training-select">
-        <label>实际训练内容（默认按计划训练）：</label>
-        <select id="trainingSelect" onchange="onTrainingSelectChange()">
-          <option value="${plannedTraining}">✅ 按计划训练：${plannedTraining}</option>
-          ${allTrainings.filter(t => t !== plannedTraining).map(t => `<option value="${t}">${t}</option>`).join('')}
-          <option value="__custom__">✏️ 其他（手动输入）…</option>
-        </select>
-        <div class="custom-input" id="customTrainingWrap">
-          <input type="text" id="customTrainingInput" placeholder="请输入训练内容，如：胸肩+有氧" autocomplete="off">
-        </div>
+        <label>实际训练内容（默认按计划，点色块即可切换）：</label>
+        ${renderTrainChips(plannedTraining)}
+      </div>
       </div>
       <div class="actions">
         <button class="btn btn-success btn-confirm" onclick="confirmCheckin('${memberId}')">✅ 确认签到</button>
@@ -2118,32 +2189,6 @@ function startCheckin(memberId) {
       </div>
     </div>
   `);
-}
-
-function onTrainingSelectChange() {
-  const sel = document.getElementById('trainingSelect');
-  const wrap = document.getElementById('customTrainingWrap');
-  if (!sel || !wrap) return;
-  if (sel.value === '__custom__') {
-    wrap.classList.add('show');
-    document.getElementById('customTrainingInput').focus();
-  } else {
-    wrap.classList.remove('show');
-  }
-}
-
-function getSelectedTraining() {
-  const sel = document.getElementById('trainingSelect');
-  if (!sel) return '';
-  if (sel.value === '__custom__') {
-    const custom = (document.getElementById('customTrainingInput')?.value || '').trim();
-    if (!custom) {
-      toast('请输入训练内容', 'warning');
-      return null;
-    }
-    return custom;
-  }
-  return sel.value;
 }
 
 function confirmCheckin(memberId) {
@@ -2225,8 +2270,6 @@ function showModifyTraining(memberId) {
   const record = state.records.find(r => r.memberId === memberId && r.date && r.date.startsWith(today));
   if (!record) { toast('未找到今日记录', 'warning'); return; }
 
-  const allTrainings = ['胸肩','背','臀','核心','心肺','腿','肩','胸部','肩部','背部','心肺1','心肺2','手臂腹','对位训练'];
-
   showModal(`
     <h3>✏ 修改训练内容</h3>
     <div class="form-group">
@@ -2238,15 +2281,8 @@ function showModifyTraining(memberId) {
       <input type="text" value="${record.training}" disabled>
     </div>
     <div class="form-group">
-      <label>修改为</label>
-      <select id="modifyTrainingSelect" onchange="onModifySelectChange()">
-        <option value="${record.training}">保持原样：${record.training}</option>
-        ${allTrainings.filter(t => t !== record.training).map(t => `<option value="${t}">${t}</option>`).join('')}
-        <option value="__custom__">✏️ 其他（手动输入）…</option>
-      </select>
-      <div class="custom-input" id="modifyCustomWrap" style="margin-top:8px;display:none;">
-        <input type="text" id="modifyCustomInput" placeholder="请输入训练内容，如：胸肩+有氧" autocomplete="off">
-      </div>
+      <label>修改为（点选色块，或手动输入）</label>
+      ${renderTrainChips(record.training)}
     </div>
     <div class="modal-actions">
       <button class="btn btn-primary" onclick="confirmModifyTraining('${memberId}')">确认修改</button>
@@ -2255,30 +2291,9 @@ function showModifyTraining(memberId) {
   `);
 }
 
-function onModifySelectChange() {
-  const sel = document.getElementById('modifyTrainingSelect');
-  const wrap = document.getElementById('modifyCustomWrap');
-  if (!sel || !wrap) return;
-  if (sel.value === '__custom__') {
-    wrap.style.display = 'block';
-    document.getElementById('modifyCustomInput').focus();
-  } else {
-    wrap.style.display = 'none';
-  }
-}
-
 function getModifyTraining() {
-  const sel = document.getElementById('modifyTrainingSelect');
-  if (!sel) return '';
-  if (sel.value === '__custom__') {
-    const custom = (document.getElementById('modifyCustomInput')?.value || '').trim();
-    if (!custom) {
-      toast('请输入训练内容', 'warning');
-      return null;
-    }
-    return custom;
-  }
-  return sel.value;
+  const v = getSelectedTraining();
+  return v === null ? '' : v;
 }
 
 function confirmModifyTraining(memberId) {
@@ -2318,6 +2333,9 @@ function confirmModifyTraining(memberId) {
 function renderMembers() {
   const search = (document.getElementById('memberSearch')?.value || '').toLowerCase();
   let members = state.members.filter(m => m.name);
+  if (currentCoachFilter) {
+    members = members.filter(m => m.coach === currentCoachFilter);
+  }
   if (search) {
     members = members.filter(m =>
       m.name.toLowerCase().includes(search) ||
@@ -2457,6 +2475,9 @@ function confirmDeleteMember(id) {
 function renderRecords() {
   const search = (document.getElementById('recordSearch')?.value || '').toLowerCase();
   let records = [...state.records].reverse(); // newest first
+  if (currentCoachFilter) {
+    records = records.filter(r => r.coach === currentCoachFilter);
+  }
   if (search) {
     records = records.filter(r =>
       (r.memberName || '').toLowerCase().includes(search) ||
@@ -2513,23 +2534,8 @@ function showRecordModal() {
       </select>
     </div>
     <div class="form-group">
-      <label>训练内容</label>
-      <select id="rTraining">
-        <option value="胸肩">胸肩</option>
-        <option value="背">背</option>
-        <option value="臀">臀</option>
-        <option value="核心">核心</option>
-        <option value="心肺">心肺</option>
-        <option value="腿">腿</option>
-        <option value="肩">肩</option>
-        <option value="胸部">胸部</option>
-        <option value="肩部">肩部</option>
-        <option value="背部">背部</option>
-        <option value="心肺1">心肺1</option>
-        <option value="心肺2">心肺2</option>
-        <option value="手臂腹">手臂腹</option>
-        <option value="对位训练">对位训练</option>
-      </select>
+      <label>训练内容（点选色块，或手动输入）</label>
+      ${renderTrainChips('')}
     </div>
     <div class="form-group">
       <label>是否临时更换</label>
@@ -2556,15 +2562,7 @@ function onRecordMemberChange() {
   if (member) {
     const seqArr = parseSequence(member.sequence);
     const nextT = member.nextTraining || seqArr[0] || '';
-    if (nextT) {
-      const sel = document.getElementById('rTraining');
-      for (let opt of sel.options) {
-        if (opt.value === nextT || trainingMatch(opt.value, nextT)) {
-          sel.value = opt.value;
-          break;
-        }
-      }
-    }
+    if (nextT) selectTraining(nextT);
   }
 }
 
@@ -2573,7 +2571,8 @@ function saveRecord() {
   const member = state.members.find(m => m.id === mid);
   if (!mid || !member) { toast('请选择会员', 'error'); return; }
 
-  const training = document.getElementById('rTraining').value;
+  const training = getSelectedTraining();
+  if (training === null) return;
   const date = document.getElementById('rDate').value.trim();
   if (!date) { toast('请填写日期', 'error'); return; }
 
