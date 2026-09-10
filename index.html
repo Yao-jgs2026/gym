@@ -701,7 +701,7 @@ tbody tr:nth-child(even):hover { background: #F7FEE7; }
         <button class="btn btn-primary" onclick="exportJSON()">导出 JSON 完整备份</button>
         <button class="btn btn-default" onclick="document.getElementById('jsonFileInput').click()">导入备份恢复</button>
         <button class="btn btn-success" onclick="exportCSV()">导出训练记录 CSV</button>
-        <button class="btn btn-warning" onclick="restoreSnapshot()">↩️ 恢复导入前的数据</button>
+        <button class="btn btn-warning" onclick="restoreSnapshot()">↩️ 恢复导入/清空前的数据</button>
         <button class="btn btn-danger" onclick="resetAllData()">🗑 清空全部数据重新开始</button>
         <input type="file" id="jsonFileInput" accept=".json,application/json" style="display:none;" onchange="importJSON(this)">
       </div>
@@ -1623,7 +1623,7 @@ function resetAllData() {
   const ok1 = confirm(
     `确定要清空全部会员信息和训练记录吗？\n\n` +
     `当前：${state.members.length} 位会员、${state.records.length} 条训练记录\n\n` +
-    `清空前会自动留一份快照，之后随时点「↩️ 恢复导入前的数据」就能找回。${cloudWarn}`
+    `清空前会自动留一份快照，之后随时点「↩️ 恢复导入/清空前的数据」就能找回。${cloudWarn}`
   );
   if (!ok1) return;
   const ok2 = confirm('最后确认一次：真的要清空吗？\n\n（训练内容参数和颜色规则会保留，只清会员和训练记录）');
@@ -1637,6 +1637,8 @@ function resetAllData() {
     params: state.params || []
   };
   saveData();
+  // 清空后让 _bak 也等于空数据，否则 init() 下次加载会认为"主存档被清空"而自动回滚
+  try { localStorage.setItem(STORAGE_KEY + '_bak', JSON.stringify(state)); } catch (e) {}
   refreshAllViews();
   // 把"空数据"也同步到云端：否则开了自动同步时，定时拉取会把云端旧数据又合并回来，看起来像"清了又恢复"
   const cfgAfter = getCloudCfg();
@@ -1661,7 +1663,7 @@ function restoreSnapshot() {
   if (!raw) { toast('这台设备上没有找到可恢复的快照', 'warning'); return; }
   let data;
   try { data = normalizeState(raw); } catch (e) { toast('快照损坏，无法恢复', 'error'); return; }
-  const src = pre ? '导入前' : '上一次保存前';
+  const src = pre ? '导入/清空前' : '上一次保存前';
   if (!confirm(`恢复到「${src}」的数据：\n${data.members.length} 位会员、${data.records.length} 条训练记录。\n\n当前数据会被替换（当前状态也会存成新快照，可再切回来），确定吗？`)) return;
   state = data;
   saveData();
