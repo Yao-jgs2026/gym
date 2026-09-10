@@ -474,6 +474,7 @@ tbody tr:nth-child(even):hover { background: #F7FEE7; }
   <div class="footer">
     <div>数据来源: 大姚健身会员管理系统1.xlsm</div>
     <div style="margin-top:4px;">VBA功能 Web版</div>
+    <div style="margin-top:4px;" id="versionTag"></div>
   </div>
 </div>
 
@@ -937,6 +938,8 @@ const INITIAL_DATA = {
 // State
 let state = { members: [], records: [], params: [] };
 let currentCoachFilter = '';
+// 版本号：每次更新都会变，用来确认你看到的是不是最新版
+const APP_VERSION = '2026-09-10 11:15';
 
 // ===================== 云同步（腾讯云开发 CloudBase） =====================
 const CLOUD_SDK_URLS = [
@@ -1363,6 +1366,8 @@ function init() {
   const nameEl = document.getElementById('systemNameDisplay');
   if (nameEl && state.systemName) nameEl.textContent = state.systemName;
   if (state.systemName) document.title = state.systemName + ' - 工作台';
+  const vt = document.getElementById('versionTag');
+  if (vt) vt.textContent = '版本 ' + APP_VERSION;
   updateSaveStatus('ok');
   setupAutoSaveHooks();
   initCloudUI();
