@@ -419,7 +419,7 @@ tbody tr:nth-child(even):hover { background: #F7FEE7; }
   .btn-sm { min-height: 36px; padding: 7px 12px; font-size: 13px; }
   .btn-lg { min-height: 50px; font-size: 17px; }
   input, select, textarea { font-size: 16px !important; }
-  #memberSearch, #recordSearch, #coachFilter, #coachFilterMembers, #coachFilterRecords { width: 100% !important; min-height: 44px; }
+  #memberSearch, #recordSearch, #coachFilter, #coachFilterMembers, #coachFilterRecords, #coachFilterStats, #coachFilterCalendar { width: 100% !important; min-height: 44px; }
   .filter-bar { flex-direction: column; align-items: stretch; gap: 8px; }
   .filter-bar select, .filter-bar input { width: 100%; min-height: 44px; }
   .form-inline { flex-direction: column; align-items: stretch; }
@@ -606,6 +606,9 @@ tbody tr:nth-child(even):hover { background: #F7FEE7; }
     <div class="page-header">
       <h2>📊 数据统计</h2>
       <div class="actions">
+        <select id="coachFilterStats" onchange="applyCoachFilter(this.id)" style="padding:8px 16px;border:1px solid var(--c-border);border-radius:4px;font-size:14px;">
+          <option value="">全部教练</option>
+        </select>
         <button class="btn btn-primary" onclick="updateStats(true)">🔄 更新数据统计</button>
       </div>
     </div>
@@ -631,6 +634,9 @@ tbody tr:nth-child(even):hover { background: #F7FEE7; }
     <div class="page-header">
       <h2>📅 月度训练日历</h2>
       <div class="actions">
+        <select id="coachFilterCalendar" onchange="applyCoachFilter(this.id)" style="padding:8px 16px;border:1px solid var(--c-border);border-radius:4px;font-size:14px;">
+          <option value="">全部教练</option>
+        </select>
         <button class="btn btn-default" onclick="shiftCalendarMonth(-1)">‹ 上月</button>
         <input type="month" id="calendarMonth" onchange="renderCalendar()" title="选好月份自动显示" style="padding:8px 12px;border:1px solid var(--c-border);border-radius:4px;font-size:14px;">
         <button class="btn btn-default" onclick="shiftCalendarMonth(1)">下月 ›</button>
@@ -1969,7 +1975,7 @@ function syncAllMembers() {
 // ===================== COACH FILTER =====================
 function initCoachFilter() {
   const coaches = [...new Set(state.members.map(m => m.coach).filter(c => c))];
-  ['coachFilter', 'coachFilterMembers', 'coachFilterRecords'].forEach(id => {
+  ['coachFilter', 'coachFilterMembers', 'coachFilterRecords', 'coachFilterStats', 'coachFilterCalendar'].forEach(id => {
     const sel = document.getElementById(id);
     if (!sel) return;
     sel.innerHTML = '<option value="">全部教练</option>';
@@ -1985,13 +1991,15 @@ function initCoachFilter() {
 function applyCoachFilter(sourceId) {
   const el = document.getElementById(sourceId || 'coachFilter');
   currentCoachFilter = el ? el.value : '';
-  ['coachFilter', 'coachFilterMembers', 'coachFilterRecords'].forEach(id => {
+  ['coachFilter', 'coachFilterMembers', 'coachFilterRecords', 'coachFilterStats', 'coachFilterCalendar'].forEach(id => {
     const sel = document.getElementById(id);
     if (sel && sel.value !== currentCoachFilter) sel.value = currentCoachFilter;
   });
   renderDashboard();
   renderMembers();
   renderRecords();
+  updateStats(false);
+  renderCalendar();
   updateHeroClock();
 }
 
@@ -2637,7 +2645,10 @@ function updateStats(showMsg) {
     const weekStart = getWeekStart();
 
     // Defensive: ensure arrays exist and filter out invalid entries
-    const members = Array.isArray(state.members) ? state.members.filter(m => m && typeof m === 'object' && m.name) : [];
+    let members = Array.isArray(state.members) ? state.members.filter(m => m && typeof m === 'object' && m.name) : [];
+    if (currentCoachFilter) {
+      members = members.filter(m => (m.coach || '') === currentCoachFilter);
+    }
     const records = Array.isArray(state.records) ? state.records.filter(r => r && typeof r === 'object') : [];
 
     members.forEach(member => {
