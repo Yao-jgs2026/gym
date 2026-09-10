@@ -608,9 +608,11 @@ tbody tr:nth-child(even):hover { background: #F7FEE7; }
     <div class="page-header">
       <h2>📅 月度训练日历</h2>
       <div class="actions">
-        <label>查询月份：</label>
-        <input type="month" id="calendarMonth" onchange="renderCalendar()" style="padding:8px 12px;border:1px solid var(--c-border);border-radius:4px;font-size:14px;">
-        <button class="btn btn-primary" onclick="renderCalendar()">📅 生成月度训练日历</button>
+        <button class="btn btn-default" onclick="shiftCalendarMonth(-1)">‹ 上月</button>
+        <input type="month" id="calendarMonth" onchange="renderCalendar()" title="选好月份自动显示" style="padding:8px 12px;border:1px solid var(--c-border);border-radius:4px;font-size:14px;">
+        <button class="btn btn-default" onclick="shiftCalendarMonth(1)">下月 ›</button>
+        <button class="btn btn-primary" onclick="setCalendarThisMonth()">📅 本月</button>
+        <span id="calendarSummary" style="font-size:13px;color:var(--c-text-light);align-self:center;"></span>
       </div>
     </div>
     <div class="table-wrap">
@@ -940,7 +942,7 @@ const INITIAL_DATA = {
 let state = { members: [], records: [], params: [] };
 let currentCoachFilter = '';
 // 版本号：每次更新都会变，用来确认你看到的是不是最新版
-const APP_VERSION = '2026-09-10 13:10';
+const APP_VERSION = '2026-09-10 13:22';
 
 // ===================== 云同步（腾讯云开发 CloudBase） =====================
 const CLOUD_SDK_URLS = [
@@ -2323,7 +2325,7 @@ function renderMembers() {
       (m.coach || '').toLowerCase().includes(search)
     );
   }
-  members.sort((a, b) => Number(b.id) - Number(a.id));
+  members.sort((a, b) => Number(a.id) - Number(b.id));
 
   const tbody = document.getElementById('memberTableBody');
   if (members.length === 0) {
@@ -2757,6 +2759,22 @@ function updateStats(showMsg) {
 
 // ===================== MONTHLY CANDAR (月度训练日历) =====================
 // VBA: GYM_生成月度训练日历
+// 月份快速切换（选完自动出结果，不用再点生成）
+function shiftCalendarMonth(delta) {
+  const el = document.getElementById('calendarMonth');
+  const cur = el && el.value ? new Date(el.value + '-01') : new Date();
+  cur.setMonth(cur.getMonth() + delta);
+  el.value = `${cur.getFullYear()}-${String(cur.getMonth() + 1).padStart(2, '0')}`;
+  renderCalendar();
+}
+
+function setCalendarThisMonth() {
+  const now = new Date();
+  const el = document.getElementById('calendarMonth');
+  if (el) el.value = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+  renderCalendar();
+}
+
 function renderCalendar() {
   const monthInput = document.getElementById('calendarMonth');
   let queryDate = new Date();
@@ -2774,7 +2792,7 @@ function renderCalendar() {
   if (currentCoachFilter) {
     members = members.filter(m => m.coach === currentCoachFilter);
   }
-  members.sort((a, b) => Number(b.id) - Number(a.id));
+  members.sort((a, b) => Number(a.id) - Number(b.id));
 
   const table = document.getElementById('calendarTable');
   let html = '<thead><tr><th style="position:sticky;left:0;z-index:3;">会员姓名</th>';
@@ -2806,6 +2824,17 @@ function renderCalendar() {
 
   html += '</tbody>';
   table.innerHTML = html;
+
+  // 顶部一行小结：这个月有多少会员、多少条训练记录
+  const summaryEl = document.getElementById('calendarSummary');
+  if (summaryEl) {
+    const ids = new Set(members.map(m => String(m.id)));
+    const monthRecs = state.records.filter(r => {
+      const rd = parseDate(r.date);
+      return rd && rd.getFullYear() === year && rd.getMonth() === month && ids.has(String(r.memberId));
+    }).length;
+    summaryEl.textContent = `${year}年${month + 1}月 · ${members.length} 位会员 · ${monthRecs} 条训练记录`;
+  }
 }
 
 // ===================== PARAMETERS (参数) =====================
@@ -2928,16 +2957,16 @@ function renderFAQ() {
     { step: 2, loc: '首页', action: '点击【刷新首页】', result: '同步会员列表、签到按钮、当天签到状态', note: '建议每天第一次使用先刷新' },
     { step: 3, loc: '首页', action: '选择教练下拉框', result: '首页、会员数据库、训练记录、数据统计、月度训练日历同步筛选', note: '选【全部教练】可恢复全部' },
     { step: 4, loc: '首页', action: '点击会员对应【签到】按钮', result: '生成训练记录，并更新上一次/下一次训练', note: '同一天重复签到会被系统拦截' },
-    { step: 5, loc: '月度训练日历', action: '输入月份日期后点击【生成月度训练日历】', result: '按训练记录生成当月训练分布', note: '生成后如需筛选，回首页重新选择教练' },
+    { step: 5, loc: '月度训练日历', action: '选择或切换月份，日历自动生成', result: '按训练记录生成当月训练分布', note: '生成后如需筛选，回首页重新选择教练' },
   ];
 
   const faqItems = [
-    { q: '教练筛选后，月度训练日历又显示全部会员', cause: '点击【生成月度训练日历】后，系统会重新生成会员名单', fix: '回到【首页】，重新选择一次教练下拉框；或先选【全部教练】，再选回目标教练', note: '这是正常现象，不是数据丢失' },
+    { q: '教练筛选后，月度训练日历又显示全部会员', cause: '切换月份后，日历会按当前教练筛选自动生成', fix: '回到【首页】，重新选择一次教练下拉框；或先选【全部教练】，再选回目标教练', note: '这是正常现象，不是数据丢失' },
     { q: '筛选教练后，有些签到按钮不见了', cause: 'Excel按钮属于浮动控件，隐藏/显示行后可能出现位置错位', fix: '先选择【全部教练】→ 点击【刷新首页】→ 再重新选择目标教练', note: '不要手动拖动签到按钮' },
     { q: '点击教练下拉框，提示无法运行某某宏', cause: '下拉框绑定的宏名不存在，通常是清理旧模块后导致', fix: '检查是否保留 GYM6教练下拉变化 和 教练下拉变化 两个兼容宏', note: '不要继续删除模块' },
     { q: '点击【刷新首页】后，筛选状态恢复全部', cause: '刷新首页会重新同步会员列表和按钮，可能恢复隐藏行', fix: '推荐顺序：先【刷新首页】→ 再选择教练筛选', note: '刷新不等于筛选' },
     { q: '月度训练日历颜色变了', cause: '旧代码可能清除了颜色、边框，或重新按训练内容上色', fix: '生成日历代码只保留 ClearContents，不使用 Clear / ClearFormats', note: '现在应只更新文字，不动格式' },
-    { q: '月度训练日历没有最新签到记录', cause: '日历不是实时刷新，而是根据训练记录重新生成', fix: '签到后进入【月度训练日历】，重新点击【生成月度训练日历】', note: '生成后如需筛选，回首页重新选教练' },
+    { q: '月度训练日历没有最新签到记录', cause: '日历不是实时刷新，而是根据训练记录重新生成', fix: '签到后进入【月度训练日历】，重新选一次月份或点【本月】', note: '生成后如需筛选，回首页重新选教练' },
     { q: '会员当天已签到，但想改训练内容', cause: '当天已有训练记录，直接再签到会被拦截', fix: '优先使用【修改训练内容】功能；不要随意手改多张表', note: '训练记录、上次训练、下次训练要保持一致' },
     { q: '同一天重复点击签到按钮', cause: '系统检测到该会员当天已有训练记录', fix: '如确实误签，先使用【撤销签到】，再重新签到', note: '不要手动新增重复记录' },
     { q: '新增会员后，首页没有出现', cause: '会员数据库新增后，首页尚未刷新', fix: '在【会员数据库】完整填写会员编号、姓名、教练、下一次训练 → 回首页点击【刷新首页】', note: '会员编号不能重复，姓名不要留空' },
