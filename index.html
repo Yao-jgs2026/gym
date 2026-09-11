@@ -725,8 +725,8 @@ tbody tr:nth-child(even):hover { background: #F7FEE7; }
 
       <div id="gistCfg" style="display:none;margin-top:10px;">
         <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
-          <input type="password" id="gistToken" placeholder="GitHub Token（只勾 Gists 读写）" style="padding:8px 12px;border:1px solid var(--c-border);border-radius:4px;font-size:16px;min-width:230px;">
-          <input type="text" id="gistId" placeholder="存档ID（点右侧创建后自动填入）" style="padding:8px 12px;border:1px solid var(--c-border);border-radius:4px;font-size:16px;min-width:230px;">
+          <input type="password" id="gistToken" placeholder="GitHub Token（只勾 Gists 读写）" onchange="persistGistCfg()" style="padding:8px 12px;border:1px solid var(--c-border);border-radius:4px;font-size:16px;min-width:230px;">
+          <input type="text" id="gistId" placeholder="存档ID（点右侧创建后自动填入）" onchange="persistGistCfg()" style="padding:8px 12px;border:1px solid var(--c-border);border-radius:4px;font-size:16px;min-width:230px;">
           <button class="btn btn-default" onclick="gistCreate()">🆕 创建云端存档</button>
           <button class="btn btn-primary" onclick="syncTest()">🔌 连接测试</button>
         </div>
@@ -1129,6 +1129,14 @@ function gistIdValue() {
   const el = document.getElementById('gistId');
   return ((el && el.value) || getCloudCfg().gistId || '').trim();
 }
+// 用户填写 Token / 存档ID 后即时存进配置，状态灯才会亮（之前只有点"连接测试/上传/拉取"成功才存，导致灯一直未开启）
+function persistGistCfg() {
+  const t = gistTokenValue(), id = gistIdValue();
+  if (t || id) {
+    setCloudCfg({ channel: 'gist', gistToken: t, gistId: id });
+    updateCloudInfo();
+  }
+}
 function gistAuthHeaders() {
   return {
     'Authorization': 'Bearer ' + gistTokenValue(),
@@ -1281,6 +1289,7 @@ async function syncTest() {
 function switchCloudChannel() {
   const ch = document.getElementById('cloudChannel')?.value || '';
   setCloudCfg({ channel: ch });
+  if (ch === 'gist') persistGistCfg();
   updateCloudInfo();
 }
 
@@ -1289,6 +1298,7 @@ function toggleCloudAuto() {
   const cb = document.getElementById('cloudAuto');
   const on = cb ? cb.checked : false;
   setCloudCfg({ auto: on });
+  if (getCloudCfg().channel === 'gist') persistGistCfg();
   if (cloudTimer) { clearInterval(cloudTimer); cloudTimer = null; }
   if (on) {
     // 页面在后台时不轮询，省流量也省云资源
