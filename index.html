@@ -1141,7 +1141,8 @@ function cloudPayloadText() {
     systemName: state.systemName,
     members: state.members,
     records: state.records,
-    params: state.params
+    params: state.params,
+    clearEpoch: state.clearEpoch || 0
   });
 }
 
@@ -1211,6 +1212,25 @@ async function gistPull(silent) {
       content = await r2.text();
     }
     const payload = JSON.parse(content);
+    const cloudEpoch = payload.clearEpoch || 0;
+    const localEpoch = state.clearEpoch || 0;
+    // 云端是「清空之后」的快照（清空纪元更大）→ 整体替换本机，保证"一处清空、处处清空"
+    if (cloudEpoch > localEpoch) {
+      state = {
+        systemName: payload.systemName || state.systemName,
+        members: payload.members || [],
+        records: payload.records || [],
+        params: (payload.params && payload.params.length) ? payload.params : (state.params || []),
+        clearEpoch: cloudEpoch
+      };
+      saveData();
+      refreshAllViews();
+      setCloudCfg({ channel: 'gist', gistToken: token, gistId: id, lastSync: new Date().toISOString(), connected: true });
+      if (!silent) toast('已按云端同步（含清空操作），本机数据已与云端一致', 'success');
+      else toast('云端有更新（含清空），已自动同步', 'info');
+      updateCloudInfo();
+      return true;
+    }
     const beforeR = state.records.length, beforeM = state.members.length;
     const merged = mergeState(state, payload);
     const addR = merged.records.length - beforeR, addM = merged.members.length - beforeM;
@@ -1587,7 +1607,8 @@ function mergeState(base, incoming) {
     systemName: base.systemName || incoming.systemName,
     members: [...memberMap.values()],
     records: records,
-    params: (incoming.params && incoming.params.length) ? incoming.params : (base.params || [])
+    params: (incoming.params && incoming.params.length) ? incoming.params : (base.params || []),
+    clearEpoch: Math.max(base.clearEpoch || 0, incoming.clearEpoch || 0)
   };
 }
 
@@ -1634,7 +1655,8 @@ function resetAllData() {
     systemName: state.systemName || '大姚健身管理系统',
     members: [],
     records: [],
-    params: state.params || []
+    params: state.params || [],
+    clearEpoch: (state.clearEpoch || 0) + 1
   };
   saveData();
   // 清空后让 _bak 也等于空数据，否则 init() 下次加载会认为"主存档被清空"而自动回滚
@@ -1643,7 +1665,7 @@ function resetAllData() {
   // 把"空数据"也同步到云端：否则开了自动同步时，定时拉取会把云端旧数据又合并回来，看起来像"清了又恢复"
   const cfgAfter = getCloudCfg();
   if (cfgAfter.channel === 'gist' && cfgAfter.gistId && cfgAfter.gistToken) {
-    syncUpload(true).catch(() => {});
+    syncUpload(true).catch(() => toast('⚠️ 本机已清空，但云端同步失败，其他设备可能仍显示旧数据', 'warning'));
   }
   toast('已清空，可以开始手动添加会员了', 'success');
 }
@@ -1688,7 +1710,8 @@ function doImport(mode) {
       systemName: data.systemName || state.systemName,
       members: data.members,
       records: Array.isArray(data.records) ? data.records : [],
-      params: Array.isArray(data.params) && data.params.length ? data.params : state.params
+      params: Array.isArray(data.params) && data.params.length ? data.params : state.params,
+      clearEpoch: 0
     };
     saveData();
     refreshAllViews();
