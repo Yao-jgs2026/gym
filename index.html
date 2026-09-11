@@ -1326,7 +1326,11 @@ function updateCloudInfo() {
   const chip = document.getElementById('cloudStatus');
   if (chip) {
     const txt = chip.querySelector('.txt');
-    if (!cfg.env) { chip.className = 'cloud-status'; txt.textContent = '云同步未开启'; }
+    // 按当前通道判断是否配置完整（之前只判 cfg.env，是腾讯云通道的字段，导致 Gist 通道永远显示"未开启"）
+    const chOk = cfg.channel === 'gist'
+      ? !!(cfg.gistId && cfg.gistToken)
+      : cfg.channel === 'cloudbase' ? !!cfg.env : false;
+    if (!chOk) { chip.className = 'cloud-status'; txt.textContent = '云同步未开启'; }
     else if (!cfg.connected) { chip.className = 'cloud-status err'; txt.textContent = '云端未连接'; }
     else {
       chip.className = 'cloud-status on';
