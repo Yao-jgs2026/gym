@@ -121,6 +121,9 @@ tbody tr:nth-child(even):hover { background: #F7FEE7; }
 .cloud-status.loading .dot { background: #F59E0B; }
 .cloud-status.err { color: var(--c-danger); }
 .cloud-status.err .dot { background: var(--c-danger); }
+.cloud-status.warn { color: #B45309; }
+.cloud-status.warn .dot { background: #F59E0B; }
+.cloud-status.on { cursor: default; }
 
 /* 保存状态指示 */
 .save-status {
@@ -1340,11 +1343,24 @@ function updateCloudInfo() {
     const chOk = cfg.channel === 'gist'
       ? !!(cfg.gistId && cfg.gistToken)
       : cfg.channel === 'cloudbase' ? !!cfg.env : false;
-    if (!chOk) { chip.className = 'cloud-status'; txt.textContent = '云同步未开启'; }
-    else if (!cfg.connected) { chip.className = 'cloud-status err'; txt.textContent = '云端未连接'; }
-    else {
+    if (!chOk) {
+      // 选了通道但 Token/存档ID 没填全 → 明确告诉用户缺什么，并可点击直接跳到设置
+      chip.className = 'cloud-status warn';
+      txt.textContent = cfg.channel ? '云同步待配置 · 点此设置' : '云同步未开启';
+      chip.style.cursor = 'pointer';
+      chip.title = '点这里进入「参数 → 云同步」，填好 Token 和存档ID 即可开启';
+      chip.onclick = () => navigateTo('params');
+    } else if (!cfg.connected) {
+      chip.className = 'cloud-status err';
+      txt.textContent = '云端未连接 · 点此检查';
+      chip.style.cursor = 'pointer';
+      chip.title = '点这里进入「参数 → 云同步」点一下「🔌 连接测试」查看原因';
+      chip.onclick = () => navigateTo('params');
+    } else {
       chip.className = 'cloud-status on';
       txt.textContent = '☁ 已同步 ' + (cfg.lastSync ? new Date(cfg.lastSync).toTimeString().slice(0, 5) : '');
+      chip.style.cursor = '';
+      chip.onclick = null;
     }
   }
   // 面板显隐 + 回填
@@ -3018,7 +3034,7 @@ function renderFAQ() {
 
   const faqItems = [
     { q: '数据存在哪里？会不会突然没了？', cause: '数据存在当前这台设备的浏览器里，签到、修改都是即时自动保存（顶部有「已保存 时:分:秒」状态灯）', fix: '正常情况下不会丢；但清理浏览器缓存、换电脑或换浏览器会看不到（数据没丢，只是不在这台设备上）', note: '想多设备共用：参数页 → 云同步；想保底：每周导出一次 JSON 备份' },
-    { q: '店里签到的记录，我自己的电脑看不到', cause: '每台设备各自存一份，网页不会自动互通', fix: '参数页 → 云同步 → 通道选 GitHub 存档 → 填同一个 Token 和存档ID → 一台点【上传到云端】、其他设备点【从云端拉取】→ 勾【自动同步】', note: '开了自动同步后，本机改动 2 秒后自动上传，页面开着时每分钟自动拉一次' },
+    { q: '店里签到的记录，我自己的电脑看不到', cause: '每台设备各自存一份，网页不会自动互通；而且 Token 和存档ID 两栏都必须填全，缺一个顶部就显示「云同步待配置」', fix: '参数页 → 云同步 → 通道选「GitHub 存档」→ 粘贴 Token → 点【🆕 创建云端存档】自动生成存档ID（其他设备填同一个存档ID）→ 点【⬆️ 上传到云端】→ 勾【自动同步】', note: 'Token 必须是勾了「gists」权限的那种（只勾了 repo 的 Token 不能用，会报 404）；每台设备都要各填一次，Token 只存在本机浏览器，不会上传' },
     { q: '导错了文件，会员编号和记录全没了', cause: '导入时选了「覆盖」，或导入的文件不是本系统导出的备份', fix: '参数页 → 点【↩️ 恢复导入前的数据】，可以找回导入前的那一版', note: '导错后先别签到、别改数据，避免快照被覆盖' },
     { q: '想把 7、8 月的旧数据全清掉重新录', cause: '部分会员已不来，历史记录没必要留', fix: '参数页 → 【🗑 清空全部数据重新开始】，两次确认后清空（训练内容参数和颜色规则保留）', note: '清空前会自动留快照，清空后仍可点【↩️ 恢复导入前的数据】找回' },
     { q: '签到时提示「请先设置训练顺序」', cause: '这位会员还没填训练顺序，系统不知道下一次该练什么', fix: '会员数据库 → 找到该会员点【编辑】→ 在「训练顺序」里填，例如：胸肩,背,臀,核心,心肺 → 保存', note: '也可在会员数据库点【🔄 同步训练状态】，系统按最近一次训练自动推算下一次' },
