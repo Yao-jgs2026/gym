@@ -1161,6 +1161,8 @@ function cloudPayloadText() {
 async function gistCreate() {
   const token = gistTokenValue();
   if (!token) { toast('请先粘贴 GitHub Token', 'warning'); return; }
+  // 已经有存档ID时，先确认，避免误点重复创建出好几个存档、导致各设备指向不同存档
+  if (gistIdValue() && !confirm('已经有一个存档ID了。\n\n只有想「重新开一份全新存档」时才需要再创建；新存档里不会有旧存档的数据，其他设备也要跟着改填新ID。\n\n确定要再建一个新的吗？\n（如果只是想继续用现在的，点「取消」，然后直接点【⬆️ 上传到云端】即可）')) return;
   try {
     const res = await fetch(GIST_API, {
       method: 'POST',
@@ -1174,8 +1176,11 @@ async function gistCreate() {
     if (!res.ok) throw new Error('HTTP ' + res.status + ' ' + (await res.text()).slice(0, 120));
     const data = await res.json();
     setCloudCfg({ channel: 'gist', gistToken: token, gistId: data.id, connected: true });
+    // 把刚生成的ID回填到输入框，保证输入框与配置始终一致（否则会出现两处ID不一样）
+    const idEl = document.getElementById('gistId');
+    if (idEl) idEl.value = data.id;
     updateCloudInfo();
-    toast('云端存档已创建！把存档ID抄给其他设备就能共享数据', 'success');
+    toast('云端存档已创建！其他设备填同一个存档ID即可共享', 'success');
   } catch (err) {
     toast('创建失败：' + (err.message || err) + '（Token 是否有效、是否勾选了 Gists 权限？）', 'error');
   }
